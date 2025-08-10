@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5001/api/v1";
+const API_URL = "https://ananda-hostal-api-4bd6e03768d8.herokuapp.com/api/v1";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
