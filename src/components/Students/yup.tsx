@@ -24,7 +24,7 @@ const studentValidationSchema = yup.object().shape({
       "Invalid blood group"
     ),
 
-  drom: yup.string().required("Dorm is required."),
+  dorm: yup.string().required("Dorm is required."),
 
   // Contact Information (nested validation)
   contact: yup.object().shape({
@@ -155,7 +155,7 @@ const studentDefaultValues = {
   class: "",
   contact: { address: "", district: "", phone: "", province: "" },
   dateOfBirth: "",
-  drom: "",
+  dorm: "",
   father: {
     employmentType: "",
     mobile: "",

@@ -3,22 +3,43 @@ import {
   ChevronRight,
   MoreHorizontal,
   Search,
+  Eye,
+  Edit,
+  Trash2,
 } from "lucide-react";
-import { FC, useState } from "react";
+import { FC, useState, useEffect, Dispatch, SetStateAction } from "react";
 import { mockStudents } from "../../data/mockData";
 
 import { StudentResponse } from "../../api/student/types";
+import StudentDetailsModal from "./StudentDetailsModal";
+import { useDeleteStudent } from "../../api/student";
+import { toast } from "react-toastify";
 
 interface Props {
   data?: StudentResponse[];
   refetch: () => void;
   loading?: boolean;
+  setSelectedStudent: Dispatch<SetStateAction<StudentResponse | undefined>>;
+  setModalOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const StudentTable: FC<Props> = ({ data = [], loading = false }) => {
+const StudentTable: FC<Props> = ({
+  data = [],
+  loading = false,
+  refetch,
+  setSelectedStudent,
+  setModalOpen,
+}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const pageSizeOptions = [5, 10, 25, 50, 100];
+
+  // Modal states
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [detailsStudent, setDetailsStudent] = useState<StudentResponse | null>(
+    null
+  );
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
   // Calculate pagination
   const totalPages = Math.ceil((data?.length || 0) / pageSize);
@@ -30,25 +51,80 @@ const StudentTable: FC<Props> = ({ data = [], loading = false }) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
+  // const getPageNumbers = () => {
+  //   const pages = [];
+  //   const maxVisiblePages = 5;
+  //
+  //   if (totalPages <= maxVisiblePages) {
+  //     for (let i = 1; i <= totalPages; i++) {
+  //       pages.push(i);
+  //     }
+  //   } else {
+  //     const start = Math.max(1, currentPage - 2);
+  //     const end = Math.min(totalPages, start + maxVisiblePages - 1);
+  //
+  //     for (let i = start; i <= end; i++) {
+  //       pages.push(i);
+  //     }
+  //   }
+  //
+  //   return pages;
+  // };
 
-    if (totalPages <= maxVisiblePages) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      const start = Math.max(1, currentPage - 2);
-      const end = Math.min(totalPages, start + maxVisiblePages - 1);
-
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-    }
-
-    return pages;
+  // Action handlers
+  const handleViewDetails = (student: StudentResponse) => {
+    setDetailsStudent(student);
+    setIsDetailsModalOpen(true);
+    setOpenDropdownId(null);
   };
+
+  const handleEdit = (student: StudentResponse) => {
+    setSelectedStudent(student);
+    setModalOpen(true);
+    setOpenDropdownId(null);
+  };
+
+  const handleDelete = (student: StudentResponse) => {
+    if (window.confirm(`Are you sure you want to delete ${student.name}?`)) {
+      deleteStudent(student._id);
+      setOpenDropdownId(null);
+    }
+  };
+
+  const toggleDropdown = (studentId: string) => {
+    setOpenDropdownId(openDropdownId === studentId ? null : studentId);
+  };
+
+  // const closeDropdown = () => {
+  //   setOpenDropdownId(null);
+  // };
+
+  // Delete student hook
+  const { mutate: deleteStudent, isPending: isDeleting } = useDeleteStudent({
+    onSuccess: () => {
+      toast.success("Student deleted successfully");
+      refetch();
+    },
+    onError: (error) => {
+      toast.error("Failed to delete student");
+      console.error("Delete error:", error);
+    },
+  });
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (openDropdownId && !target.closest(".actions-dropdown")) {
+        setOpenDropdownId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openDropdownId]);
 
   return (
     <div className="space-y-6 relative">
@@ -313,14 +389,44 @@ const StudentTable: FC<Props> = ({ data = [], loading = false }) => {
                     </td>
 
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end">
+                      <div className="flex items-center justify-end relative actions-dropdown">
                         <button
-                          // onClick={() => openDetailsModal(student)}
+                          onClick={() => toggleDropdown(student._id)}
                           className="text-gray-400 hover:text-gray-600 p-1 rounded transition-colors duration-150"
-                          title="View Details"
+                          title="Actions"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
+
+                        {/* Actions Dropdown */}
+                        {openDropdownId === student._id && (
+                          <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10 actions-dropdown">
+                            <div className="py-1">
+                              <button
+                                onClick={() => handleViewDetails(student)}
+                                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                              >
+                                <Eye className="h-4 w-4 mr-3" />
+                                View Details
+                              </button>
+                              <button
+                                onClick={() => handleEdit(student)}
+                                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                              >
+                                <Edit className="h-4 w-4 mr-3" />
+                                Edit Student
+                              </button>
+                              <button
+                                onClick={() => handleDelete(student)}
+                                disabled={isDeleting}
+                                className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <Trash2 className="h-4 w-4 mr-3" />
+                                {isDeleting ? "Deleting..." : "Delete Student"}
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -396,11 +502,17 @@ const StudentTable: FC<Props> = ({ data = [], loading = false }) => {
         </div>
       </div>
 
-      {/* <StudentDetailsModal
-        isOpen={isDetailsModalOpen}
-        onClose={() => setIsDetailsModalOpen(false)}
-        student={selectedStudent}
-      /> */}
+      {/* Modals */}
+      {detailsStudent && (
+        <StudentDetailsModal
+          isOpen={isDetailsModalOpen}
+          onClose={() => {
+            setIsDetailsModalOpen(false);
+            setDetailsStudent(null);
+          }}
+          student={detailsStudent}
+        />
+      )}
     </div>
   );
 };

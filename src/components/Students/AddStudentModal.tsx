@@ -1,39 +1,39 @@
-import { HeartPulse, Home, MapPin, User, Users, X } from "lucide-react";
-import React, { useEffect } from "react";
-import { Student } from "../../types";
-import Button from "../elements/button/Button";
-import { Controller, useForm, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { HeartPulse, Home, MapPin, User, Users, X } from "lucide-react";
+import { Dispatch, SetStateAction, useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import { useCreateStudent, useUpdateStudent } from "../../api/student";
+import { StudentResponse } from "../../api/student/types";
+import { bloodGroups, dorms } from "../../utils/constants";
+import Button from "../elements/button/Button";
+import Input from "../elements/input/Input";
+import Select from "../elements/select/Select";
+import Textarea from "../elements/textarea/Textarea";
 import {
   studentDefaultValues,
   StudentSchema,
   studentValidationSchema,
 } from "./yup";
-import Input from "../elements/input/Input";
-import Select from "../elements/select/Select";
-import { useCreateStudent } from "../../api/student";
-import { toast } from "react-toastify";
-import { bloodGroups, dorms } from "../../utils/constants";
-import Textarea from "../elements/textarea/Textarea";
 
 interface AddStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (student: Omit<Student, "id">) => void;
-  editStudent?: Student;
+  editStudent?: StudentResponse;
+  setEditStudent: Dispatch<SetStateAction<StudentResponse | undefined>>;
   refetch: () => void;
 }
 
 export default function AddStudentModal({
   isOpen,
   onClose,
-  onSave,
   editStudent,
   refetch,
 }: AddStudentModalProps) {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(studentValidationSchema),
@@ -57,6 +57,7 @@ export default function AddStudentModal({
       onSuccess() {
         refetch();
         onClose();
+        reset(studentDefaultValues);
         toast.success("Stduent create successful");
       },
       onError(error) {
@@ -64,12 +65,32 @@ export default function AddStudentModal({
       },
     });
 
+  const { mutate: UpdateStudent, isPending: pendingStudentUpdate } =
+    useUpdateStudent({
+      id: editStudent?._id,
+      onSuccess() {
+        refetch();
+        onClose();
+        toast.success("Student updated successfully.");
+      },
+      onError(error) {
+        toast.error("Student updated faild.");
+      },
+    });
+
   const onSubmit = (formData: StudentSchema) => {
-    console.log("formdata >>", formData);
-    CreateStudent(formData);
-    // onSave(formData);
-    // onClose();
+    if (editStudent) {
+      UpdateStudent(formData);
+    } else {
+      CreateStudent(formData);
+    }
   };
+
+  useEffect(() => {
+    if (editStudent) {
+      reset(editStudent);
+    }
+  }, [editStudent]);
 
   if (!isOpen) return null;
 
@@ -180,14 +201,14 @@ export default function AddStudentModal({
               <div>
                 <Controller
                   control={control}
-                  name="drom"
+                  name="dorm"
                   render={({ field }) => (
                     <Select
                       required
                       label="DOM"
                       options={filteredDOMS}
                       {...field}
-                      error={errors.drom?.message}
+                      error={errors.dorm?.message}
                     />
                   )}
                 />
@@ -586,8 +607,8 @@ export default function AddStudentModal({
             <Button
               type="submit"
               icon="material-symbols:save-outline-rounded"
-              disabled={pendingStudentCreate}
-              loading={pendingStudentCreate}
+              disabled={pendingStudentCreate || pendingStudentUpdate}
+              loading={pendingStudentCreate || pendingStudentUpdate}
             >
               {editStudent ? "Update Student" : "Add Student"}
             </Button>

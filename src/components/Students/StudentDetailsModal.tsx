@@ -1,21 +1,20 @@
-import React from "react";
 import {
   X,
   User,
   Phone,
-  Mail,
   MapPin,
   GraduationCap,
   Building2,
   Calendar,
   Heart,
 } from "lucide-react";
-import { Student } from "../../types";
+
+import { StudentResponse } from "../../api/student/types";
 
 interface StudentDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  student?: Student;
+  student?: StudentResponse;
 }
 
 export default function StudentDetailsModal({
@@ -56,16 +55,16 @@ export default function StudentDetailsModal({
                 {student.name}
               </h3>
               <p className="text-blue-600 font-medium">
-                {student.course} - Year {student.year}
+                {student.class || "-"} • DOM {student.dorm || "-"}
               </p>
               <span
                 className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1 ${
-                  student.status === "active"
+                  student.isActive
                     ? "bg-green-100 text-green-800"
                     : "bg-red-100 text-red-800"
                 }`}
               >
-                {student.status}
+                {student.isActive ? "Active" : "Inactive"}
               </span>
             </div>
           </div>
@@ -80,21 +79,11 @@ export default function StudentDetailsModal({
 
               <div className="space-y-3">
                 <div className="flex items-center">
-                  <Mail className="h-4 w-4 mr-3 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-500">Email</p>
-                    <p className="text-sm font-medium text-gray-900">
-                      {student.email}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center">
                   <Phone className="h-4 w-4 mr-3 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500">Phone</p>
                     <p className="text-sm font-medium text-gray-900">
-                      {student.phone}
+                      {student.contact?.phone || "-"}
                     </p>
                   </div>
                 </div>
@@ -104,12 +93,20 @@ export default function StudentDetailsModal({
                   <div>
                     <p className="text-sm text-gray-500">Address</p>
                     <p className="text-sm font-medium text-gray-900">
-                      {student.address}
+                      {student.contact?.address || "-"}
                     </p>
+                    {(student.contact?.district ||
+                      student.contact?.province) && (
+                      <p className="text-xs text-gray-500">
+                        {[student.contact?.district, student.contact?.province]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {student.bloodGroup && (
+                {!!student.bloodGroup && (
                   <div className="flex items-center">
                     <Heart className="h-4 w-4 mr-3 text-gray-400" />
                     <div>
@@ -130,14 +127,44 @@ export default function StudentDetailsModal({
                     </p>
                   </div>
                 </div>
+
+                <div className="flex items-center">
+                  <Calendar className="h-4 w-4 mr-3 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-500">Date of Birth</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {new Date(student.dateOfBirth).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <GraduationCap className="h-4 w-4 mr-3 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-500">Class</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {student.class || "-"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <GraduationCap className="h-4 w-4 mr-3 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-500">Admission No</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {student.admissionNumber}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Guardian & Hostel Information */}
+            {/* Guardian & Dorm Information */}
             <div className="space-y-4">
               <h4 className="text-lg font-medium text-gray-900 flex items-center">
                 <Building2 className="h-5 w-5 mr-2 text-green-600" />
-                Guardian & Hostel Details
+                Guardian & Dorm Details
               </h4>
 
               <div className="space-y-3">
@@ -146,7 +173,7 @@ export default function StudentDetailsModal({
                   <div>
                     <p className="text-sm text-gray-500">Guardian Name</p>
                     <p className="text-sm font-medium text-gray-900">
-                      {student.guardianName}
+                      {student.guardian?.name || "-"}
                     </p>
                   </div>
                 </div>
@@ -156,59 +183,87 @@ export default function StudentDetailsModal({
                   <div>
                     <p className="text-sm text-gray-500">Guardian Phone</p>
                     <p className="text-sm font-medium text-gray-900">
-                      {student.guardianPhone}
+                      {student.guardian?.phoneNumber || "-"}
                     </p>
                   </div>
                 </div>
 
-                {student.emergencyContact && (
-                  <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-3 text-gray-400" />
+                <div className="flex items-center">
+                  <Building2 className="h-4 w-4 mr-3 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-500">Dorm</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {student.dorm || "-"}
+                    </p>
+                  </div>
+                </div>
+
+                {!!student.guardian?.address && (
+                  <div className="flex items-start">
+                    <MapPin className="h-4 w-4 mr-3 text-gray-400 mt-1" />
                     <div>
-                      <p className="text-sm text-gray-500">Emergency Contact</p>
+                      <p className="text-sm text-gray-500">Guardian Address</p>
                       <p className="text-sm font-medium text-gray-900">
-                        {student.emergencyContact}
+                        {student.guardian?.address}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {!!student.guardian?.occupation && (
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 mr-3 text-gray-400" />
+                    <div>
+                      <p className="text-sm text-gray-500">
+                        Guardian Occupation
+                      </p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {student.guardian?.occupation}
                       </p>
                     </div>
                   </div>
                 )}
 
                 <div className="flex items-center">
-                  <Building2 className="h-4 w-4 mr-3 text-gray-400" />
+                  <User className="h-4 w-4 mr-3 text-gray-400" />
                   <div>
-                    <p className="text-sm text-gray-500">Hostel & Room</p>
+                    <p className="text-sm text-gray-500">Number of Siblings</p>
                     <p className="text-sm font-medium text-gray-900">
-                      {student.hostel} - Room {student.room}
+                      {student.numberOfSiblings}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center">
-                  <GraduationCap className="h-4 w-4 mr-3 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-500">Monthly Fee</p>
-                    <p className="text-sm font-medium text-gray-900">
-                      ₹{student.monthlyFee.toLocaleString()}
-                    </p>
+                {(student.father?.name || student.father?.mobile) && (
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 mr-3 text-gray-400" />
+                    <div>
+                      <p className="text-sm text-gray-500">Father</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {[student.father?.name, student.father?.mobile]
+                          .filter(Boolean)
+                          .join(" • ") || "-"}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {(student.mother?.name || student.mother?.mobile) && (
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 mr-3 text-gray-400" />
+                    <div>
+                      <p className="text-sm text-gray-500">Mother</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        {[student.mother?.name, student.mother?.mobile]
+                          .filter(Boolean)
+                          .join(" • ") || "-"}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-
-          {/* Medical Conditions */}
-          {student.medicalConditions && (
-            <div className="border-t border-gray-200 pt-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-3">
-                Medical Information
-              </h4>
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p className="text-sm text-yellow-800">
-                  {student.medicalConditions}
-                </p>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="flex justify-end p-6 border-t border-gray-200">

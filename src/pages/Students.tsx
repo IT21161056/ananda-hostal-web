@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import { dorms, student_status } from "../utils/constants";
 import Input from "../components/elements/input/Input";
 import Select from "../components/elements/select/Select";
+import { StudentResponse } from "../api/student/types";
 
 export default function Students() {
   const { hasPermission } = useAuth();
@@ -18,8 +19,9 @@ export default function Students() {
   const [filterStatus, setFilterStatus] = useState<student_status>(
     student_status.Active
   );
-  const [editingStudent, setEditingStudent] = useState<Student | undefined>();
-  const [selectedStudent, setSelectedStudent] = useState<Student | undefined>();
+  const [selectedStudent, setSelectedStudent] = useState<
+    StudentResponse | undefined
+  >();
 
   const getStatus = (status: string): boolean | undefined => {
     if (status == "") return undefined;
@@ -38,11 +40,6 @@ export default function Students() {
     // This will be handled by the StudentTable component
   };
 
-  const handleEditStudent = (studentData: Omit<Student, "id">) => {
-    if (editingStudent) {
-    }
-  };
-
   const {
     data: studentData,
     refetch: refetchStudents,
@@ -52,6 +49,11 @@ export default function Students() {
     isActive: getStatus(filterStatus),
     dom: getDom(filterHostel),
   });
+
+  const handleModalClose = () => {
+    setIsAddModalOpen(false);
+    setSelectedStudent(undefined);
+  };
 
   return (
     <div className="space-y-6">
@@ -109,6 +111,8 @@ export default function Students() {
         data={studentData?.data}
         refetch={refetchStudents}
         loading={fetchingAllStudents}
+        setSelectedStudent={setSelectedStudent}
+        setModalOpen={setIsAddModalOpen}
       />
 
       {/* Modals */}
@@ -116,9 +120,9 @@ export default function Students() {
         <AddStudentModal
           refetch={refetchStudents}
           isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onSave={editingStudent ? handleEditStudent : handleAddStudent}
-          editStudent={editingStudent}
+          onClose={handleModalClose}
+          editStudent={selectedStudent}
+          setEditStudent={setSelectedStudent}
         />
       )}
     </div>

@@ -48,6 +48,7 @@ export type GetAllStudentsPaginated = {
 };
 
 export type TUseCreateUser = {
+  id?: string;
   onSuccess: () => void;
   onError: (error: ApiError) => void;
 };
