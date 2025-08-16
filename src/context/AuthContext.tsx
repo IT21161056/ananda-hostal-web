@@ -38,6 +38,7 @@ const rolePermissions = {
     "create_users",
     "edit_users",
     "delete_users",
+    "use_chat",
   ],
   warden: [
     "view_dashboard",

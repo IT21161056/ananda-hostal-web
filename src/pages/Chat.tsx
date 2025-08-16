@@ -140,7 +140,7 @@ const Chat = () => {
 
   if (!usernameSet) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className=" flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -177,8 +177,8 @@ const Chat = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto max-w-4xl h-screen flex flex-col">
+    <div className="flex flex-1 bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="container mx-auto max-w-4xl flex-1 flex flex-col">
         {/* Header */}
         <div className="bg-white shadow-lg rounded-b-2xl px-6 py-4">
           <div className="flex items-center justify-between">

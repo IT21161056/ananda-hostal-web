@@ -135,7 +135,21 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           </ProtectedRoute>
         }
       />
-      <Route path="/chat" element={<Chat />} />
+      <Route
+        path="/chat"
+        element={
+          <ProtectedRoute permission="use_chat">
+            <Header
+              title="Chat"
+              onMenuClick={toggleMobileSidebar}
+              sidebarCollapsed={sidebarCollapsed}
+            />
+            <main className="flex-1 flex p-0 overflow-y-auto">
+              <Chat />
+            </main>
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
