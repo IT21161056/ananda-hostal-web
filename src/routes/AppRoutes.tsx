@@ -12,6 +12,7 @@ import Settings from "../pages/Settings";
 import LoginForm from "../components/Login/LoginForm";
 import { useAuth } from "../context/AuthContext";
 import Chat from "../pages/Chat";
+import AttendanceTracker from "../components/Attendance/AttendanceTracker";
 
 interface AppRoutesProps {
   sidebarCollapsed: boolean;
@@ -131,6 +132,21 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
             />
             <main className="flex-1 p-6 overflow-y-auto">
               <Settings />
+            </main>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/attendance/new"
+        element={
+          <ProtectedRoute permission="manage_attendance">
+            <Header
+              title="New Attendance"
+              onMenuClick={toggleMobileSidebar}
+              sidebarCollapsed={sidebarCollapsed}
+            />
+            <main className="flex-1 p-6 overflow-y-auto">
+              <AttendanceTracker />
             </main>
           </ProtectedRoute>
         }
