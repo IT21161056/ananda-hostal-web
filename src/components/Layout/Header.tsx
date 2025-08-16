@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Bell, Search, Menu, User, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useSocket } from "../../context/socket";
 
 interface HeaderProps {
   title: string;
@@ -13,6 +14,7 @@ export default function Header({
   onMenuClick,
   sidebarCollapsed,
 }: HeaderProps) {
+  const socket = useSocket();
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -23,6 +25,20 @@ export default function Header({
       console.error("Logout error:", error);
     }
   };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for messages
+    socket.on("debug-message", (msg) => {
+      console.log("message >>", msg);
+    });
+
+    // Clean up on unmount
+    return () => {
+      socket.off("debug-message");
+    };
+  }, [socket]);
 
   return (
     <header

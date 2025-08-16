@@ -1,5 +1,11 @@
 import axios from "axios";
 
+// const API_URL = import.meta.env.VITE_API_URL;
+
+// if (!API_URL) {
+//   throw new Error("VITE_API_URL is not defined in environment variables");
+// }
+
 const API_URL = "https://ananda-hostal-api-4bd6e03768d8.herokuapp.com/api/v1";
 
 // const API_URL = "http://localhost:5001/api/v1";

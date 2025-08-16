@@ -11,6 +11,7 @@ import Reports from "../pages/Reports";
 import Settings from "../pages/Settings";
 import LoginForm from "../components/Login/LoginForm";
 import { useAuth } from "../context/AuthContext";
+import Chat from "../pages/Chat";
 
 interface AppRoutesProps {
   sidebarCollapsed: boolean;
@@ -134,6 +135,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           </ProtectedRoute>
         }
       />
+      <Route path="/chat" element={<Chat />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

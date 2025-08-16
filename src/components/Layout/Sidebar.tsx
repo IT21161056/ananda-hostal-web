@@ -30,12 +30,12 @@ const navigation = [
     icon: Users,
     permission: "view_students",
   },
-  // {
-  //   name: "Attendance",
-  //   href: "/attendance",
-  //   icon: ClipboardCheck,
-  //   permission: "view_attendance",
-  // },
+  {
+    name: "Attendance",
+    href: "/attendance",
+    icon: ClipboardCheck,
+    permission: "view_attendance",
+  },
   // {
   //   name: "Meal Planning",
   //   href: "/meals",

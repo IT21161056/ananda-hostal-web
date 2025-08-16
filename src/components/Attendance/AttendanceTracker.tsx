@@ -37,20 +37,6 @@ interface AttendanceData {
   };
 }
 
-// Mock data for students (ages 6-11)
-const mockStudents: Student[] = [
-  { id: "1", name: "Emma Johnson", dorm: "Dorm A", room: "101", age: 8 },
-  { id: "2", name: "Liam Smith", dorm: "Dorm A", room: "102", age: 9 },
-  { id: "3", name: "Sophia Brown", dorm: "Dorm B", room: "201", age: 7 },
-  { id: "4", name: "Noah Wilson", dorm: "Dorm B", room: "202", age: 10 },
-  { id: "5", name: "Olivia Davis", dorm: "Dorm C", room: "301", age: 6 },
-  { id: "6", name: "William Miller", dorm: "Dorm C", room: "302", age: 11 },
-  { id: "7", name: "Ava Garcia", dorm: "Dorm A", room: "103", age: 8 },
-  { id: "8", name: "James Rodriguez", dorm: "Dorm B", room: "203", age: 9 },
-  { id: "9", name: "Isabella Martinez", dorm: "Dorm C", room: "303", age: 7 },
-  { id: "10", name: "Benjamin Anderson", dorm: "Dorm A", room: "104", age: 10 },
-];
-
 export default function AttendanceTracker() {
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0]
@@ -63,22 +49,29 @@ export default function AttendanceTracker() {
   const [dormFilter, setFilterDorm] = useState<string>();
   const [search, setSearch] = useState<string>();
 
+  const { data: studentsData, isLoading } = useGetStudentsForAttendance({
+    dorm: dormFilter,
+    search: search,
+  });
+
   // Initialize attendance data for current date and session
   useEffect(() => {
-    const key = `${selectedDate}-${selectedSession}`;
-    if (!attendanceData[key]) {
-      setAttendanceData((prev) => ({
-        ...prev,
-        [key]: mockStudents.reduce(
-          (acc: { [key: string]: AttendanceStatus }, student) => ({
-            ...acc,
-            [student.id]: "present",
-          }),
-          {}
-        ),
-      }));
+    if (studentsData?.data) {
+      const key = `${selectedDate}-${selectedSession}`;
+      if (!attendanceData[key]) {
+        setAttendanceData((prev) => ({
+          ...prev,
+          [key]: studentsData.data.reduce(
+            (acc: { [key: string]: AttendanceStatus }, student) => ({
+              ...acc,
+              [student.id]: "present",
+            }),
+            {}
+          ),
+        }));
+      }
     }
-  }, [selectedDate, selectedSession, attendanceData]);
+  }, [selectedDate, selectedSession, attendanceData, studentsData]);
 
   const getCurrentAttendance = (): {
     [studentId: string]: AttendanceStatus;
@@ -102,6 +95,8 @@ export default function AttendanceTracker() {
   };
 
   const handleSave = async () => {
+    if (!studentsData?.data) return;
+
     setIsSaving(true);
 
     // Simulate API call
@@ -126,6 +121,10 @@ export default function AttendanceTracker() {
   };
 
   const getAttendanceStats = () => {
+    if (!studentsData?.data) {
+      return { present: 0, absent: 0, leave: 0, total: 0 };
+    }
+
     const current = getCurrentAttendance();
     const present = Object.values(current).filter(
       (status) => status === "present"
@@ -137,18 +136,11 @@ export default function AttendanceTracker() {
       (status) => status === "leave"
     ).length;
 
-    return { present, absent, leave, total: mockStudents.length };
+    return { present, absent, leave, total: studentsData.data.length };
   };
 
   const stats = getAttendanceStats();
   const currentAttendance = getCurrentAttendance();
-
-  const { data: studentsData, isLoading } = useGetStudentsForAttendance({
-    dorm: dormFilter,
-    search: search,
-  });
-
-  console.log("students >>", studentsData);
 
   return (
     <div className="space-y-6">
@@ -210,7 +202,7 @@ export default function AttendanceTracker() {
 
           <button
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || !studentsData?.data}
             className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
           >
             <Save className="h-4 w-4 mr-2" />
@@ -287,75 +279,85 @@ export default function AttendanceTracker() {
           </div>
         </div>
 
-        <div className="space-y-3">
-          {studentsData?.data.map((student) => {
-            const currentStatus = currentAttendance[student.id] || "present";
+        {isLoading ? (
+          <div className="flex justify-center items-center py-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {studentsData?.data.map((student) => {
+              const currentStatus = currentAttendance[student.id] || "present";
 
-            return (
-              <div
-                key={student.id}
-                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-semibold text-blue-600">
-                      {student.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </span>
+              return (
+                <div
+                  key={student.id}
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                >
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                      <span className="text-sm font-semibold text-blue-600">
+                        {student.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        {student.name}
+                      </h4>
+                      <p className="text-sm text-gray-500">{student.dorm}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900">
-                      {student.name}
-                    </h4>
-                    <p className="text-sm text-gray-500">{student.dorm}</p>
+
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() =>
+                        handleAttendanceChange(student.id, "present")
+                      }
+                      className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                        currentStatus === "present"
+                          ? "bg-green-100 text-green-800 border-2 border-green-300 shadow-sm"
+                          : "bg-gray-100 text-gray-600 hover:bg-green-50 border-2 border-transparent"
+                      }`}
+                    >
+                      <Check className="h-4 w-4 mr-1" />
+                      Present
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        handleAttendanceChange(student.id, "absent")
+                      }
+                      className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                        currentStatus === "absent"
+                          ? "bg-red-100 text-red-800 border-2 border-red-300 shadow-sm"
+                          : "bg-gray-100 text-gray-600 hover:bg-red-50 border-2 border-transparent"
+                      }`}
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Absent
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        handleAttendanceChange(student.id, "leave")
+                      }
+                      className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                        currentStatus === "leave"
+                          ? "bg-yellow-100 text-yellow-800 border-2 border-yellow-300 shadow-sm"
+                          : "bg-gray-100 text-gray-600 hover:bg-yellow-50 border-2 border-transparent"
+                      }`}
+                    >
+                      <Clock className="h-4 w-4 mr-1" />
+                      On Leave
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() =>
-                      handleAttendanceChange(student.id, "present")
-                    }
-                    className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                      currentStatus === "present"
-                        ? "bg-green-100 text-green-800 border-2 border-green-300 shadow-sm"
-                        : "bg-gray-100 text-gray-600 hover:bg-green-50 border-2 border-transparent"
-                    }`}
-                  >
-                    <Check className="h-4 w-4 mr-1" />
-                    Present
-                  </button>
-
-                  <button
-                    onClick={() => handleAttendanceChange(student.id, "absent")}
-                    className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                      currentStatus === "absent"
-                        ? "bg-red-100 text-red-800 border-2 border-red-300 shadow-sm"
-                        : "bg-gray-100 text-gray-600 hover:bg-red-50 border-2 border-transparent"
-                    }`}
-                  >
-                    <X className="h-4 w-4 mr-1" />
-                    Absent
-                  </button>
-
-                  <button
-                    onClick={() => handleAttendanceChange(student.id, "leave")}
-                    className={`flex items-center px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                      currentStatus === "leave"
-                        ? "bg-yellow-100 text-yellow-800 border-2 border-yellow-300 shadow-sm"
-                        : "bg-gray-100 text-gray-600 hover:bg-yellow-50 border-2 border-transparent"
-                    }`}
-                  >
-                    <Clock className="h-4 w-4 mr-1" />
-                    On Leave
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

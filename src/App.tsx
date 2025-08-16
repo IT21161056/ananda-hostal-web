@@ -11,7 +11,7 @@ import LoginForm from "./components/Login/LoginForm";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AppRoutes from "./routes/AppRoutes";
 import { ToastContainer } from "react-toastify";
-
+import { SocketProvider } from "./context/socket";
 function AppContent() {
   const { isAuthenticated, loading, user } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -87,11 +87,13 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </AuthProvider>
+      <SocketProvider>
+        <AuthProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </AuthProvider>
+      </SocketProvider>
       <ToastContainer />
     </QueryClientProvider>
   );
