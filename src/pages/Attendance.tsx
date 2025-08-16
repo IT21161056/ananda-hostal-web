@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { BarChart3, ClipboardCheck } from "lucide-react";
 import AttendanceTracker from "../components/Attendance/AttendanceTracker";
 import AttendanceReports from "../components/Attendance/AttendanceReports";
+import AttendanceHistoryDashboard from "../components/Attendance/AttendanceHistoryDashboard";
 
 export default function Attendance() {
   const [activeTab, setActiveTab] = useState<"tracker" | "reports">("tracker");
@@ -42,7 +43,11 @@ export default function Attendance() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === "tracker" ? <AttendanceTracker /> : <AttendanceReports />}
+      {activeTab === "tracker" ? (
+        <AttendanceHistoryDashboard />
+      ) : (
+        <AttendanceReports />
+      )}
     </div>
   );
 }
