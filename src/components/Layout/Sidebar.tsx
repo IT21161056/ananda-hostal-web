@@ -36,6 +36,12 @@ const navigation = [
     icon: ClipboardCheck,
     permission: "view_attendance",
   },
+  {
+    name: "Chat",
+    href: "/chat",
+    icon: ClipboardCheck,
+    permission: "use_chat",
+  },
   // {
   //   name: "Meal Planning",
   //   href: "/meals",
