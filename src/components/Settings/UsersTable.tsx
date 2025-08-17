@@ -74,7 +74,7 @@ const UsersTable: FC<Props> = ({ data = [], loading = false }) => {
     }
   };
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden relative">
+    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden relative mt-6">
       {/* Loading overlay */}
       {loading && (
         <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">

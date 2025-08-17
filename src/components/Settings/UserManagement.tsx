@@ -129,7 +129,7 @@ export default function UserManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mt-6">
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
@@ -149,7 +149,7 @@ export default function UserManagement() {
       </div>
 
       {/* Search and Filter Controls */}
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4 mt-6">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input

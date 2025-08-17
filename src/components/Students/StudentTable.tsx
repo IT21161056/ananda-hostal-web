@@ -8,30 +8,37 @@ import {
   Trash2,
 } from "lucide-react";
 import { FC, useState, useEffect, Dispatch, SetStateAction } from "react";
-import { mockStudents } from "../../data/mockData";
-
-import { StudentResponse } from "../../api/student/types";
+import {
+  GetAllStudentsPaginated,
+  StudentResponse,
+} from "../../api/student/types";
 import StudentDetailsModal from "./StudentDetailsModal";
 import { useDeleteStudent } from "../../api/student";
 import { toast } from "react-toastify";
 
 interface Props {
-  data?: StudentResponse[];
+  data?: GetAllStudentsPaginated;
   refetch: () => void;
   loading?: boolean;
   setSelectedStudent: Dispatch<SetStateAction<StudentResponse | undefined>>;
   setModalOpen: Dispatch<SetStateAction<boolean>>;
+  page: number;
+  pageSize: number;
+  setPage: Dispatch<SetStateAction<number>>;
+  setPageSize: Dispatch<SetStateAction<number>>;
 }
 
 const StudentTable: FC<Props> = ({
-  data = [],
+  data,
   loading = false,
   refetch,
   setSelectedStudent,
   setModalOpen,
+  page,
+  pageSize,
+  setPage,
+  setPageSize,
 }) => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const pageSizeOptions = [5, 10, 25, 50, 100];
 
   // Modal states
@@ -42,36 +49,20 @@ const StudentTable: FC<Props> = ({
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
   // Calculate pagination
-  const totalPages = Math.ceil((data?.length || 0) / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedStudents = data?.slice(startIndex, endIndex) || [];
+  const totalStudents = data?.total || 0;
+  const totalPages = Math.ceil(totalStudents / pageSize);
+  const startIndex = (page - 1) * pageSize + 1;
+  const endIndex = Math.min(page * pageSize, totalStudents);
+
+  // Reset to first page when page size changes
+  useEffect(() => {
+    setPage(1);
+  }, [pageSize]);
 
   const goToPage = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    setPage(Math.max(1, Math.min(page, totalPages)));
   };
 
-  // const getPageNumbers = () => {
-  //   const pages = [];
-  //   const maxVisiblePages = 5;
-  //
-  //   if (totalPages <= maxVisiblePages) {
-  //     for (let i = 1; i <= totalPages; i++) {
-  //       pages.push(i);
-  //     }
-  //   } else {
-  //     const start = Math.max(1, currentPage - 2);
-  //     const end = Math.min(totalPages, start + maxVisiblePages - 1);
-  //
-  //     for (let i = start; i <= end; i++) {
-  //       pages.push(i);
-  //     }
-  //   }
-  //
-  //   return pages;
-  // };
-
-  // Action handlers
   const handleViewDetails = (student: StudentResponse) => {
     setDetailsStudent(student);
     setIsDetailsModalOpen(true);
@@ -94,10 +85,6 @@ const StudentTable: FC<Props> = ({
   const toggleDropdown = (studentId: string) => {
     setOpenDropdownId(openDropdownId === studentId ? null : studentId);
   };
-
-  // const closeDropdown = () => {
-  //   setOpenDropdownId(null);
-  // };
 
   // Delete student hook
   const { mutate: deleteStudent, isPending: isDeleting } = useDeleteStudent({
@@ -127,7 +114,7 @@ const StudentTable: FC<Props> = ({
   }, [openDropdownId]);
 
   return (
-    <div className="space-y-6 relative">
+    <div className="relative mt-6">
       {/* Loading overlay */}
       {loading && (
         <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
@@ -144,6 +131,7 @@ const StudentTable: FC<Props> = ({
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
+            {/* Table Headers (unchanged) */}
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left">
@@ -200,7 +188,6 @@ const StudentTable: FC<Props> = ({
                     </svg>
                   </button>
                 </th>
-
                 <th className="px-6 py-3 text-left">
                   <button className="group inline-flex items-center text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700">
                     Phone
@@ -273,7 +260,6 @@ const StudentTable: FC<Props> = ({
                     </svg>
                   </button>
                 </th>
-
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
@@ -314,7 +300,7 @@ const StudentTable: FC<Props> = ({
                     </tr>
                   ))}
                 </>
-              ) : paginatedStudents.length === 0 ? (
+              ) : !data?.data || data.data.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center">
                     <div className="text-gray-500">
@@ -327,7 +313,7 @@ const StudentTable: FC<Props> = ({
                   </td>
                 </tr>
               ) : (
-                paginatedStudents.map((student) => (
+                data.data.map((student) => (
                   <tr
                     key={student._id}
                     className="hover:bg-gray-50 transition-colors duration-150"
@@ -352,7 +338,6 @@ const StudentTable: FC<Props> = ({
                         {student.contact?.phone ?? "-"}
                       </div>
                     </td>
-
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center px-3 py-1 rounded-md border text-xs font-medium ${
@@ -387,7 +372,6 @@ const StudentTable: FC<Props> = ({
                         }
                       )}
                     </td>
-
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end relative actions-dropdown">
                         <button
@@ -397,8 +381,6 @@ const StudentTable: FC<Props> = ({
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
-
-                        {/* Actions Dropdown */}
                         {openDropdownId === student._id && (
                           <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10 actions-dropdown">
                             <div className="py-1">
@@ -456,46 +438,48 @@ const StudentTable: FC<Props> = ({
               <span className="text-sm text-gray-700">Per page</span>
 
               <div className="hidden sm:block text-sm text-gray-700">
-                <span className="font-medium">{startIndex + 1}</span> to{" "}
-                <span className="font-medium">
-                  {Math.min(endIndex, mockStudents.length)}
-                </span>{" "}
-                of <span className="font-medium">{mockStudents.length}</span>{" "}
-                results
+                <span className="font-medium">{startIndex}</span> to{" "}
+                <span className="font-medium">{endIndex}</span> of{" "}
+                <span className="font-medium">{totalStudents}</span> results
               </div>
             </div>
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 text-sm text-gray-500">
-                  <span>First</span>
-                  <span>Last</span>
+                <button
+                  onClick={() => goToPage(1)}
+                  disabled={page === 1 || loading}
+                  className="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+                >
+                  First
+                </button>
+                <button
+                  onClick={() => goToPage(page - 1)}
+                  disabled={page === 1 || loading}
+                  className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <div className="flex items-center mx-2">
+                  <span className="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded">
+                    {page}
+                  </span>
                 </div>
-
-                <div className="flex items-center">
-                  <button
-                    onClick={() => goToPage(currentPage - 1)}
-                    disabled={currentPage === 1 || loading}
-                    className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-
-                  <div className="flex items-center mx-2">
-                    <span className="px-3 py-1 text-sm font-medium text-white bg-blue-600 rounded">
-                      {currentPage}
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage === totalPages || loading}
-                    className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => goToPage(page + 1)}
+                  disabled={page === totalPages || loading}
+                  className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => goToPage(totalPages)}
+                  disabled={page === totalPages || loading}
+                  className="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+                >
+                  Last
+                </button>
               </div>
             )}
           </div>

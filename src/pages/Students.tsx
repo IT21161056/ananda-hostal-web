@@ -13,6 +13,8 @@ import { StudentResponse } from "../api/student/types";
 
 export default function Students() {
   const { hasPermission } = useAuth();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState<string | undefined>();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [filterHostel, setFilterHostel] = useState("");
@@ -47,7 +49,9 @@ export default function Students() {
   } = useGetAllStudents({
     search: searchTerm,
     isActive: getStatus(filterStatus),
-    dom: getDom(filterHostel),
+    dorm: getDom(filterHostel),
+    page: page,
+    pageSize: pageSize,
   });
 
   const handleModalClose = () => {
@@ -56,7 +60,7 @@ export default function Students() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="">
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
@@ -78,7 +82,7 @@ export default function Students() {
       </div>
 
       {/* Search and Filter Controls */}
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4 mt-6">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
@@ -99,7 +103,7 @@ export default function Students() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as student_status)}
-            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500  w-full transition-colors duration-200  shadow-sm outline-none"
           >
             <option value="">All Status</option>
             <option value={student_status.Active}>Active</option>
@@ -108,11 +112,15 @@ export default function Students() {
         </div>
       </div>
       <StudentTable
-        data={studentData?.data}
+        data={studentData}
         refetch={refetchStudents}
         loading={fetchingAllStudents}
         setSelectedStudent={setSelectedStudent}
         setModalOpen={setIsAddModalOpen}
+        page={page}
+        pageSize={pageSize}
+        setPage={setPage}
+        setPageSize={setPageSize}
       />
 
       {/* Modals */}
