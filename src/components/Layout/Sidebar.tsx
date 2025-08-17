@@ -135,9 +135,9 @@
 //           <div className=" flex items-center justify-center">
 //             {/* <Building2 className="h-8 w-8 text-blue-400" /> */}
 //             {/* <div className="p-1 bg-white rounded-full shadow-sm">
-//               <img 
-//                 src={collegeLogo} 
-//                 alt="Ananda College Logo" 
+//               <img
+//                 src={collegeLogo}
+//                 alt="Ananda College Logo"
 //                 className="h-12 w-20 object-cover" // or object-contain
 //               />
 //             </div> */}
@@ -217,14 +217,13 @@
 //   onToggle: () => void;
 // }
 
-
 // const navigation = [
 //   {
 //     name: "Dashboard",
 //     href: "/",
 //     icon: "material-symbols:dashboard-outline-rounded",
 //     permission: "view_dashboard",
-    
+
 //   },
 //   {
 //     name: "Students",
@@ -321,9 +320,9 @@
 //             isCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"
 //           }`}
 //         >
-//           <Icon 
-//             icon="material-symbols:school-outline-rounded" 
-//             className="h-8 w-8 text-amber-600 flex-shrink-0" 
+//           <Icon
+//             icon="material-symbols:school-outline-rounded"
+//             className="h-8 w-8 text-amber-600 flex-shrink-0"
 //           />
 //           <span className="ml-3 text-xl font-bold truncate">Ananda Hostel</span>
 //         </div>
@@ -331,9 +330,9 @@
 //         {/* Collapsed Logo - Centered */}
 //         {isCollapsed && (
 //           <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center">
-//             <Icon 
-//               icon="material-symbols:school-outline-rounded" 
-//               className="h-8 w-8 text-amber-800" 
+//             <Icon
+//               icon="material-symbols:school-outline-rounded"
+//               className="h-8 w-8 text-amber-800"
 //             />
 //           </div>
 //         )}
@@ -401,11 +400,6 @@
 //     </div>
 //   );
 // }
-
-
-
-
-
 
 // import { ChevronRight } from "lucide-react";
 // import { Icon } from "@iconify/react";
@@ -520,9 +514,9 @@
 //             isCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"
 //           }`}
 //         >
-//           <Icon 
-//             icon="solar:buildings-3-outline" 
-//             className="h-8 w-8 text-blue-600 flex-shrink-0" 
+//           <Icon
+//             icon="solar:buildings-3-outline"
+//             className="h-8 w-8 text-blue-600 flex-shrink-0"
 //           />
 //           <span className="ml-3 text-xl font-bold truncate text-gray-800">Ananda Hostel</span>
 //         </div>
@@ -530,9 +524,9 @@
 //         {/* Collapsed Logo - Centered */}
 //         {isCollapsed && (
 //           <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center">
-//             <Icon 
-//               icon="solar:buildings-3-outline" 
-//               className="h-8 w-8 text-blue-600" 
+//             <Icon
+//               icon="solar:buildings-3-outline"
+//               className="h-8 w-8 text-blue-600"
 //             />
 //           </div>
 //         )}
@@ -601,9 +595,6 @@
 //   );
 // }
 
-
-
-
 import { ChevronRight } from "lucide-react";
 import { Icon } from "@iconify/react";
 import { NavLink } from "react-router-dom";
@@ -625,7 +616,7 @@ const navigation = [
   },
   {
     name: "Students",
-    href: "/students", 
+    href: "/students",
     icon: "fluent:people-team-20-filled",
     gradient: "from-blue-500 to-cyan-600",
     permission: "view_students",
@@ -683,62 +674,49 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
   return (
     <div
-      className={`fixed inset-y-0 left-0 z-50 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 transform transition-all duration-500 ease-out flex flex-col backdrop-blur-xl border-r border-slate-700/50 ${
+      className={`fixed inset-y-0 left-0 z-50 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 transform transition-all duration-300 flex flex-col backdrop-blur-xl border-r border-slate-700/50 ${
         isCollapsed ? "w-20" : "w-64"
       }`}
     >
       {/* Animated Background Overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#800000]/100 via-transparent to-amber-500/100 opacity-50"></div>
-      
+
       {/* Header */}
-      <div className="relative flex items-center justify-between h-20 px-6 border-b border-slate-700/50 flex-shrink-0">
+      <div className="relative flex items-center justify-between h-20 px-4 border-b border-slate-700/50 flex-shrink-0">
         {/* Logo and Title */}
         <div
-          className={`flex items-center transition-all duration-500 min-w-0 ${
-            isCollapsed ? "opacity-0 scale-95 pointer-events-none" : "opacity-100 scale-100"
+          className={`flex items-center transition-all duration-300 min-w-0 ${
+            isCollapsed
+              ? "opacity-0 scale-95 pointer-events-none"
+              : "opacity-100 scale-100"
           }`}
         >
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-cyan-500 rounded-xl blur-sm opacity-75"></div>
             <div className="relative bg-gradient-to-r from-amber-500 to-red-700 p-2 rounded-xl">
-              <Icon 
-                icon="fluent:building-home-20-filled" 
-                className="h-6 w-6 text-white" 
+              <Icon
+                icon="fluent:building-home-20-filled"
+                className="h-6 w-6 text-white"
               />
             </div>
           </div>
-          <div className="ml-1">
-            <span className="text-[1.099rem] font-bold text-white">Ananda Hostel</span>
+          <div className="ml-2">
+            <span className="text-[1.099rem] font-bold text-white text-nowrap">
+              Ananda Hostel
+            </span>
             <div className="text-xs text-slate-400">Management System</div>
           </div>
         </div>
 
-        {/* Collapsed Logo - Centered */}
-        {isCollapsed && (
-          <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-cyan-500 rounded-xl blur-sm opacity-75"></div>
-              <div className="relative bg-gradient-to-r from-red-700 to-amber-500 p-2 rounded-xl">
-                <Icon 
-                  icon="fluent:building-home-20-filled" 
-                  className="h-6 w-6 text-white" 
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Toggle Button */}
         <button
           onClick={onToggle}
-          className={`relative p-3 rounded-full bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-300 z-10 group border border-slate-600/30 ${
-            isCollapsed ? "absolute right-1" : "absolute left-4"
-          }`}
+          className={`relative p-3 rounded-xl bg-slate-500/50 hover:bg-slate-400/50 transition-all duration-300 z-10 group border border-slate-600/30`}
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-cyan-500/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="bg-gradient-to-r from-violet-500/20 to-cyan-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           <ChevronRight
-            className={`h-4 w-4 duration-500 text-slate-300 relative z-10 ${
+            className={`h-4 w-4 duration-300 text-slate-300 relative z-10 ${
               !isCollapsed ? "rotate-180" : ""
             }`}
           />
@@ -752,28 +730,37 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             key={item.name}
             to={item.href}
             className={({ isActive }) =>
-              `group flex items-center px-4 py-4 text-sm font-medium rounded-2xl transition-all duration-300 relative overflow-hidden transform hover:scale-[1.02] ${
+              `group flex items-center ${
+                isCollapsed ? "" : "px-4"
+              } py-4 text-sm font-medium rounded-2xl  border border-transparent transition inset-0 duration-300 relative overflow-hidden transform hover:scale-[1.02] ${
                 isActive
-                  ? "bg-white/10 text-white shadow-lg backdrop-blur-sm border border-white/10"
+                  ? "bg-white/10 text-white shadow-lg backdrop-blur-sm border-white/20"
                   : "text-slate-300 hover:bg-white/5 hover:text-white"
               }`
             }
             title={isCollapsed ? item.name : ""}
-            style={{
-              animationDelay: `${index * 50}ms`,
-            }}
+            // style={{
+            //   animationDelay: `${index * 50}ms`,
+            // }}
           >
             {/* Background gradient for active/hover */}
-            <div className={`absolute inset-0 bg-gradient-to-r ${item.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-2xl`}></div>
-            
+            <div
+              className={`absolute inset-0 bg-gradient-to-r ${item.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-2xl`}
+            ></div>
+
             {/* Icon container */}
-            <div className={`relative flex-shrink-0 ${isCollapsed ? "mx-auto" : "mr-4"}`}>
-              <div className={`absolute inset-0 bg-gradient-to-r ${item.gradient} rounded-xl blur-sm opacity-0 group-hover:opacity-60 transition-all duration-300`}></div>
-              <div className={`relative bg-gradient-to-r ${item.gradient} p-1.5 rounded-xl transition-all duration-300 group-hover:scale-110`}>
-                <Icon
-                  icon={item.icon}
-                  className="h-5 w-5 text-white"
-                />
+            <div
+              className={`relative flex-shrink-0 ${
+                isCollapsed ? "mx-auto" : "mr-4"
+              }`}
+            >
+              <div
+                className={`absolute inset-0 bg-gradient-to-r ${item.gradient} rounded-xl blur-sm opacity-0 group-hover:opacity-60 transition-all duration-300`}
+              ></div>
+              <div
+                className={`relative bg-gradient-to-r ${item.gradient} p-1.5 rounded-xl transition-all duration-300 group-hover:scale-110`}
+              >
+                <Icon icon={item.icon} className="h-5 w-5 text-white" />
               </div>
             </div>
 
@@ -787,7 +774,9 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
             {/* Tooltip for collapsed state */}
             {isCollapsed && (
               <div className="absolute left-full ml-3 px-4 py-3 bg-slate-800 text-white text-sm rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 shadow-2xl border border-slate-600/50 backdrop-blur-sm">
-                <div className={`absolute inset-0 bg-gradient-to-r ${item.gradient} opacity-10 rounded-xl`}></div>
+                <div
+                  className={`absolute inset-0 bg-gradient-to-r ${item.gradient} opacity-10 rounded-xl`}
+                ></div>
                 <span className="relative font-semibold">{item.name}</span>
                 <div className="absolute left-0 top-1/2 transform -translate-x-2 -translate-y-1/2 w-3 h-3 bg-slate-800 rotate-45 border-l border-b border-slate-600/50"></div>
               </div>
