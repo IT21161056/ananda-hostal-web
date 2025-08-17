@@ -13,6 +13,13 @@ import Input from "../elements/input/Input";
 import Select from "../elements/select/Select";
 import { dorms } from "../../utils/constants";
 import { useGetStudentsForAttendance } from "../../api/student";
+import { useCreateAttendance } from "../../api/attendance";
+import {
+  CreateAttendanceSessionRequest,
+  StudentRecord,
+} from "../../api/attendance/type";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 // Types
 interface Student {
@@ -38,6 +45,7 @@ interface AttendanceData {
 }
 
 export default function AttendanceTracker() {
+  const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
@@ -94,29 +102,38 @@ export default function AttendanceTracker() {
     }));
   };
 
+  const {
+    mutate: CreateAttendance,
+    isPending: pendingAttendanceCreating,
+    error,
+  } = useCreateAttendance({
+    onSuccess() {
+      toast.success("Attendace sheet saved successfully.");
+      navigate("/attendance");
+    },
+    onError(error) {
+      toast.error("Attendace sheet saving failed.");
+    },
+  });
+
   const handleSave = async () => {
     if (!studentsData?.data) return;
 
-    setIsSaving(true);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const attendanceRecord = {
-      date: selectedDate,
-      session: selectedSession,
-      time: selectedSession === "morning" ? "07:00" : "15:00",
+    const attendanceRecord: CreateAttendanceSessionRequest = {
+      sessionType: selectedSession,
       records: Object.entries(getCurrentAttendance()).map(
-        ([studentId, status]) => ({
-          studentId,
-          status,
-        })
+        ([studentId, status]) =>
+          ({
+            student: studentId,
+            status,
+          } as StudentRecord)
       ),
     };
 
     console.log("Saving attendance record:", attendanceRecord);
 
-    setIsSaving(false);
+    CreateAttendance(attendanceRecord);
+
     setLastSaved(new Date().toLocaleTimeString());
   };
 
@@ -202,11 +219,11 @@ export default function AttendanceTracker() {
 
           <button
             onClick={handleSave}
-            disabled={isSaving || !studentsData?.data}
-            className="flex items-center px-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+            disabled={pendingAttendanceCreating || !studentsData?.data}
+            className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
           >
-            <Save className="h-5 w-5" />
-            {isSaving ? "Saving..." : "Save Attendance"}
+            <Save className="h-4 w-4 mr-2" />
+            {pendingAttendanceCreating ? "Saving..." : "Save Attendance"}
           </button>
         </div>
 
