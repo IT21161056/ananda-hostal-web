@@ -42,9 +42,7 @@ export default function Header({
 
   return (
     <header
-      className={`bg-white border-b border-gray-200 px-6 py-4 transition-all duration-300 ${
-        sidebarCollapsed ? "ml-16" : "ml-0"
-      }`}
+      className={`bg-white border-b border-gray-200 px-6 py-4 transition-all duration-300 `}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center">

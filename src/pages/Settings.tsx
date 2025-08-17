@@ -17,7 +17,7 @@ export default function Settings() {
 
   return (
     <ProtectedRoute permission="manage_settings">
-      <div className="space-y-6">
+      <div className="">
         {/* <div>
           <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
           <p className="text-gray-600">
@@ -55,7 +55,7 @@ export default function Settings() {
 
         {/* Tab Content */}
         {activeTab === "general" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center mb-4">
                 <Shield className="h-6 w-6 text-green-600 mr-3" />
