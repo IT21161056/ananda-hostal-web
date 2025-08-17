@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -16,19 +16,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Input from "../elements/input/Input";
-import Select from "../elements/select/Select";
-import { dorms } from "../../utils/constants";
-
-interface AttendanceSession {
-  id: string;
-  date: string;
-  session: "morning" | "evening";
-  presentCount: number;
-  absentCount: number;
-  leaveCount: number;
-  totalStudents: number;
-  recordedBy: string;
-}
+import { useGetAttendanceHistory } from "../../api/attendance";
+import { AttendanceSession } from "../../api/attendance/type";
 
 const AttendanceHistoryTable = () => {
   const navigate = useNavigate();
@@ -39,129 +28,20 @@ const AttendanceHistoryTable = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [loading, setLoading] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
-  // Mock data for past attendance sessions
-  const mockSessions: AttendanceSession[] = [
-    {
-      id: "1",
-      date: "2023-06-15",
-      session: "morning",
-      presentCount: 45,
-      absentCount: 2,
-      leaveCount: 3,
-      totalStudents: 50,
-      recordedBy: "Admin User",
-    },
-    {
-      id: "2",
-      date: "2023-06-15",
-      session: "evening",
-      presentCount: 48,
-      absentCount: 1,
-      leaveCount: 1,
-      totalStudents: 50,
-      recordedBy: "Admin User",
-    },
-    {
-      id: "3",
-      date: "2023-06-14",
-      session: "morning",
-      presentCount: 42,
-      absentCount: 5,
-      leaveCount: 3,
-      totalStudents: 50,
-      recordedBy: "Teacher 1",
-    },
-    {
-      id: "4",
-      date: "2023-06-14",
-      session: "evening",
-      presentCount: 47,
-      absentCount: 1,
-      leaveCount: 2,
-      totalStudents: 50,
-      recordedBy: "Teacher 2",
-    },
-    {
-      id: "5",
-      date: "2023-06-13",
-      session: "morning",
-      presentCount: 49,
-      absentCount: 0,
-      leaveCount: 1,
-      totalStudents: 50,
-      recordedBy: "Admin User",
-    },
-    {
-      id: "6",
-      date: "2023-06-13",
-      session: "evening",
-      presentCount: 50,
-      absentCount: 0,
-      leaveCount: 0,
-      totalStudents: 50,
-      recordedBy: "Teacher 1",
-    },
-    {
-      id: "7",
-      date: "2023-06-12",
-      session: "morning",
-      presentCount: 44,
-      absentCount: 4,
-      leaveCount: 2,
-      totalStudents: 50,
-      recordedBy: "Teacher 2",
-    },
-    {
-      id: "8",
-      date: "2023-06-12",
-      session: "evening",
-      presentCount: 46,
-      absentCount: 2,
-      leaveCount: 2,
-      totalStudents: 50,
-      recordedBy: "Admin User",
-    },
-    {
-      id: "9",
-      date: "2023-06-11",
-      session: "morning",
-      presentCount: 48,
-      absentCount: 1,
-      leaveCount: 1,
-      totalStudents: 50,
-      recordedBy: "Teacher 1",
-    },
-    {
-      id: "10",
-      date: "2023-06-11",
-      session: "evening",
-      presentCount: 49,
-      absentCount: 0,
-      leaveCount: 1,
-      totalStudents: 50,
-      recordedBy: "Teacher 2",
-    },
-  ];
-
-  // Filter sessions based on selected filters
-  const filteredSessions = mockSessions.filter((session) => {
-    const matchesDate = dateFilter ? session.date === dateFilter : true;
-    const matchesSession = sessionFilter
-      ? session.session === sessionFilter
-      : true;
-    const matchesSearch = searchQuery
-      ? session.recordedBy.toLowerCase().includes(searchQuery.toLowerCase())
-      : true;
-    return matchesDate && matchesSession && matchesSearch;
-  });
+  const { data: attendanceData, isLoading: fetchingData } =
+    useGetAttendanceHistory({
+      date: dateFilter,
+      sessionType: sessionFilter,
+    });
 
   // Calculate pagination
-  const totalPages = Math.ceil(filteredSessions.length / pageSize);
+  const totalPages = Math.ceil((attendanceData?.data?.length || 0) / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const paginatedSessions = filteredSessions.slice(startIndex, endIndex);
+  const paginatedStudents =
+    attendanceData?.data?.slice(startIndex, endIndex) || [];
 
   const goToPage = (page: number) => {
     setCurrentPage(Math.max(1, Math.min(page, totalPages)));
@@ -171,10 +51,15 @@ const AttendanceHistoryTable = () => {
     navigate(
       `/attendance/track?date=${session.date}&session=${session.session}`
     );
+    setOpenDropdownId(null);
   };
 
   const handleCreateNew = () => {
     navigate("/attendance/new");
+  };
+
+  const toggleDropdown = (sessionId: string) => {
+    setOpenDropdownId(openDropdownId === sessionId ? null : sessionId);
   };
 
   const formatDate = (dateString: string) => {
@@ -187,9 +72,21 @@ const AttendanceHistoryTable = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Loading overlay */}
+      {fetchingData && (
+        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-lg font-medium text-gray-700">
+              Loading attendance records...
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header and Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <h1 className="text-2xl font-bold text-gray-900">
             Attendance History
@@ -201,10 +98,12 @@ const AttendanceHistoryTable = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full sm:w-64"
+              disabled={fetchingData}
             />
             <button
               onClick={handleCreateNew}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap"
+              disabled={fetchingData}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 whitespace-nowrap disabled:opacity-50"
             >
               Create New Attendance
             </button>
@@ -227,6 +126,7 @@ const AttendanceHistoryTable = () => {
                 setCurrentPage(1);
               }}
               className="px-3 py-2 border border-gray-300 rounded-lg"
+              disabled={fetchingData}
             />
           </div>
 
@@ -237,11 +137,12 @@ const AttendanceHistoryTable = () => {
                   setSessionFilter("morning");
                   setCurrentPage(1);
                 }}
+                disabled={fetchingData}
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
                   sessionFilter === "morning"
                     ? "bg-white text-blue-600 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
-                }`}
+                } disabled:opacity-50`}
               >
                 <Sun className="h-4 w-4 mr-1" />
                 Morning
@@ -251,11 +152,12 @@ const AttendanceHistoryTable = () => {
                   setSessionFilter("evening");
                   setCurrentPage(1);
                 }}
+                disabled={fetchingData}
                 className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
                   sessionFilter === "evening"
                     ? "bg-white text-blue-600 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
-                }`}
+                } disabled:opacity-50`}
               >
                 <Moon className="h-4 w-4 mr-1" />
                 Evening
@@ -266,7 +168,8 @@ const AttendanceHistoryTable = () => {
                     setSessionFilter("");
                     setCurrentPage(1);
                   }}
-                  className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900"
+                  disabled={fetchingData}
+                  className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 disabled:opacity-50"
                 >
                   Clear
                 </button>
@@ -322,7 +225,7 @@ const AttendanceHistoryTable = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
+              {fetchingData ? (
                 // Skeleton loading rows (5 rows)
                 <>
                   {Array.from({ length: 5 }).map((_, index) => (
@@ -356,7 +259,7 @@ const AttendanceHistoryTable = () => {
                     </tr>
                   ))}
                 </>
-              ) : filteredSessions.length === 0 ? (
+              ) : paginatedStudents.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center">
                     <div className="text-gray-500">
@@ -371,7 +274,7 @@ const AttendanceHistoryTable = () => {
                   </td>
                 </tr>
               ) : (
-                paginatedSessions.map((session) => (
+                paginatedStudents.map((session) => (
                   <tr
                     key={session.id}
                     className="hover:bg-gray-50 transition-colors duration-150"
@@ -419,14 +322,30 @@ const AttendanceHistoryTable = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right whitespace-nowrap">
-                      <div className="flex justify-end">
+                      <div className="flex justify-end relative actions-dropdown">
                         <button
-                          onClick={() => handleViewDetails(session)}
-                          className="text-blue-600 hover:text-blue-800 px-2 py-1 rounded transition-colors duration-150 flex items-center"
+                          onClick={() => toggleDropdown(session.id)}
+                          className="text-gray-400 hover:text-gray-600 p-1 rounded transition-colors duration-150"
+                          title="Actions"
+                          disabled={fetchingData}
                         >
-                          <Eye className="h-4 w-4 mr-1" />
-                          <span className="text-sm">View</span>
+                          <MoreHorizontal className="h-4 w-4" />
                         </button>
+
+                        {/* Actions Dropdown */}
+                        {openDropdownId === session.id && (
+                          <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10 actions-dropdown">
+                            <div className="py-1">
+                              <button
+                                onClick={() => handleViewDetails(session)}
+                                className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+                              >
+                                <Eye className="h-4 w-4 mr-3" />
+                                View Details
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -437,7 +356,7 @@ const AttendanceHistoryTable = () => {
         </div>
 
         {/* Pagination Footer */}
-        {filteredSessions.length > 0 && (
+        {paginatedStudents.length > 0 && (
           <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               {/* Results Info and Page Size */}
@@ -449,7 +368,7 @@ const AttendanceHistoryTable = () => {
                     setCurrentPage(1);
                   }}
                   className="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  disabled={loading}
+                  disabled={fetchingData}
                 >
                   {[5, 10, 25, 50, 100].map((size) => (
                     <option key={size} value={size}>
@@ -462,10 +381,12 @@ const AttendanceHistoryTable = () => {
                 <div className="hidden sm:block text-sm text-gray-700">
                   <span className="font-medium">{startIndex + 1}</span> to{" "}
                   <span className="font-medium">
-                    {Math.min(endIndex, filteredSessions.length)}
+                    {Math.min(endIndex, attendanceData?.data?.length || 0)}
                   </span>{" "}
                   of{" "}
-                  <span className="font-medium">{filteredSessions.length}</span>{" "}
+                  <span className="font-medium">
+                    {attendanceData?.data?.length || 0}
+                  </span>{" "}
                   results
                 </div>
               </div>
@@ -475,7 +396,7 @@ const AttendanceHistoryTable = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => goToPage(1)}
-                    disabled={currentPage === 1 || loading}
+                    disabled={currentPage === 1 || fetchingData}
                     className="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
                   >
                     First
@@ -483,7 +404,7 @@ const AttendanceHistoryTable = () => {
 
                   <button
                     onClick={() => goToPage(currentPage - 1)}
-                    disabled={currentPage === 1 || loading}
+                    disabled={currentPage === 1 || fetchingData}
                     className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -497,7 +418,7 @@ const AttendanceHistoryTable = () => {
 
                   <button
                     onClick={() => goToPage(currentPage + 1)}
-                    disabled={currentPage === totalPages || loading}
+                    disabled={currentPage === totalPages || fetchingData}
                     className="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -505,7 +426,7 @@ const AttendanceHistoryTable = () => {
 
                   <button
                     onClick={() => goToPage(totalPages)}
-                    disabled={currentPage === totalPages || loading}
+                    disabled={currentPage === totalPages || fetchingData}
                     className="px-3 py-1 text-sm text-gray-700 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
                   >
                     Last
