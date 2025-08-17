@@ -59,12 +59,12 @@ export default function Students() {
     <div className="space-y-6">
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
+        {/* <div>
           <h1 className="text-2xl font-bold text-gray-900">Students</h1>
           <p className="text-sm text-gray-600 mt-1">
             Manage student profiles and information
           </p>
-        </div>
+        </div> */}
 
         {hasPermission("manage_students") && (
           <button
