@@ -3,7 +3,7 @@ import { Search, Menu, User, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useSocket } from "../../context/socket";
 import NotificationBell from "./NotificationBell";
-import ServerStatusIndicator from "../elements/ui/serverStatusIndicator";
+import ServerStatusIndicator from "../elements/base/ServerStatusIndicator";
 
 interface HeaderProps {
   title: string;
