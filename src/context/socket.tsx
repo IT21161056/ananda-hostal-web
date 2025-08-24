@@ -7,7 +7,7 @@ import {
   ReactNode,
 } from "react";
 import { io, Socket } from "socket.io-client";
-import { SOCKET_URL_LOCAL } from "../utils/constants";
+import { SOCKET_URL, SOCKET_URL_LOCAL } from "../utils/constants";
 import { useAuth } from "./AuthContext";
 
 export interface Notification {
@@ -52,7 +52,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const accessToken = localStorage.getItem("accessToken");
 
   const addNotification = (notification: Notification) => {
-    setNotifications(prev => [notification, ...prev]);
+    setNotifications((prev) => [notification, ...prev]);
   };
 
   const clearNotifications = () => {
@@ -60,10 +60,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
   };
 
   const markNotificationAsRead = (index: number) => {
-    setNotifications(prev => 
-      prev.map((notif, i) => 
-        i === index ? { ...notif, read: true } : notif
-      )
+    setNotifications((prev) =>
+      prev.map((notif, i) => (i === index ? { ...notif, read: true } : notif))
     );
   };
 
@@ -79,9 +77,12 @@ export function SocketProvider({ children }: SocketProviderProps) {
       return;
     }
 
-    console.log("Attempting socket connection with token:", accessToken.substring(0, 20) + "...");
+    console.log(
+      "Attempting socket connection with token:",
+      accessToken.substring(0, 20) + "..."
+    );
 
-    const newSocket = io(SOCKET_URL_LOCAL, {
+    const newSocket = io(SOCKET_URL, {
       transports: ["websocket", "polling"],
       withCredentials: true,
       auth: {
@@ -96,7 +97,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
       console.log("Socket connected:", newSocket.id);
       setIsConnected(true);
       setConnectionError(null);
-      
+
       // Send authentication with user ID after connection is established
       if (user?.id) {
         setTimeout(() => {
@@ -133,7 +134,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
     newSocket.on("notification", (notification: Notification) => {
       console.log("Received notification:", notification);
       addNotification(notification);
-      
+
       // Show browser notification
       if (Notification.permission === "granted") {
         new Notification(notification.title, {
@@ -155,7 +156,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   // Request notification permission
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
-      Notification.requestPermission().then(permission => {
+      Notification.requestPermission().then((permission) => {
         console.log("Notification permission:", permission);
       });
     }
@@ -172,8 +173,6 @@ export function SocketProvider({ children }: SocketProviderProps) {
   };
 
   return (
-    <SocketContext.Provider value={value}>
-      {children}
-    </SocketContext.Provider>
+    <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
   );
 }

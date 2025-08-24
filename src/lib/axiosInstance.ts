@@ -8,7 +8,7 @@ import { API_URL, API_URL_LOCAL } from "../utils/constants";
 // }
 
 const axiosInstance = axios.create({
-  baseURL: API_URL_LOCAL,
+  baseURL: API_URL,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -50,7 +50,7 @@ axiosInstance.interceptors.response.use(
 
       try {
         // Try to refresh the token
-        const response = await axios.get(`${API_URL_LOCAL}/auth/refresh`, {
+        const response = await axios.get(`${API_URL}/auth/refresh`, {
           withCredentials: true,
         });
 
