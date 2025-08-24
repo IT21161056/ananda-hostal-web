@@ -26,6 +26,7 @@ const domOccupancy: DormData[] = [
   { name: "Dom F", occupancy: 82, capacity: 50, status: "low" },
   { name: "Dom G", occupancy: 90, capacity: 50, status: "high" },
 ];
+
 // Modern gradient colors based on occupancy level
 const getBarColor = (occupancy: number): string => {
   if (occupancy >= 90) return "#ef4444"; // Red for high occupancy
@@ -47,15 +48,18 @@ interface ChartCardProps {
 }
 
 const ChartCard: FC<ChartCardProps> = ({ title, children, className = "" }) => (
-  <div className={`bg-white rounded-2xl shadow-sm border-0 p-8 ${className}`}>
-    <div className="flex items-center justify-between mb-6">
-      <div>
-        <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+  <div
+    className={`bg-white rounded-2xl shadow-sm border-0 p-6 md:p-8 ${className}`}
+  >
+    {/* Header section - stacked on mobile */}
+    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+      <div className="mb-4 md:mb-0">
+        <h3 className="text-lg md:text-xl font-bold text-gray-900">{title}</h3>
         <p className="text-sm text-gray-500 mt-1">
           Real-time occupancy across all dormitories
         </p>
       </div>
-      <div className="flex items-center space-x-4">
+      <div className="flex flex-wrap gap-2 md:gap-4">
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 rounded-full bg-green-500"></div>
           <span className="text-xs text-gray-600">Low (&lt;85%)</span>
@@ -70,20 +74,22 @@ const ChartCard: FC<ChartCardProps> = ({ title, children, className = "" }) => (
         </div>
       </div>
     </div>
-    <div className="h-80">{children}</div>
 
-    {/* Summary stats */}
-    <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-100">
+    {/* Chart container */}
+    <div className="h-64 sm:h-72 md:h-80">{children}</div>
+
+    {/* Summary stats - stacked on mobile */}
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-100">
       <div className="text-center">
-        <p className="text-2xl font-bold text-gray-900">87.1%</p>
+        <p className="text-xl md:text-2xl font-bold text-gray-900">87.1%</p>
         <p className="text-sm text-gray-500">Avg Occupancy</p>
       </div>
       <div className="text-center">
-        <p className="text-2xl font-bold text-green-600">68</p>
+        <p className="text-xl md:text-2xl font-bold text-green-600">68</p>
         <p className="text-sm text-gray-500">Available Beds</p>
       </div>
       <div className="text-center">
-        <p className="text-2xl font-bold text-blue-600">3</p>
+        <p className="text-xl md:text-2xl font-bold text-blue-600">3</p>
         <p className="text-sm text-gray-500">High Occupancy</p>
       </div>
     </div>
@@ -98,30 +104,32 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     const availableBeds = data.capacity - occupiedBeds;
 
     return (
-      <div className="bg-white p-4 rounded-xl shadow-xl border border-gray-100">
-        <h4 className="font-bold text-gray-900 mb-2">{label}</h4>
+      <div className="bg-white p-3 md:p-4 rounded-xl shadow-xl border border-gray-100">
+        <h4 className="font-bold text-gray-900 mb-2 text-sm md:text-base">
+          {label}
+        </h4>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Occupancy:</span>
-            <span className="font-semibold text-gray-900">
+            <span className="text-xs md:text-sm text-gray-600">Occupancy:</span>
+            <span className="font-semibold text-gray-900 text-xs md:text-sm">
               {occupancyRate}%
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Occupied:</span>
-            <span className="font-semibold text-blue-600">
+            <span className="text-xs md:text-sm text-gray-600">Occupied:</span>
+            <span className="font-semibold text-blue-600 text-xs md:text-sm">
               {occupiedBeds} beds
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">Available:</span>
-            <span className="font-semibold text-green-600">
+            <span className="text-xs md:text-sm text-gray-600">Available:</span>
+            <span className="font-semibold text-green-600 text-xs md:text-sm">
               {availableBeds} beds
             </span>
           </div>
           <div className="pt-2 border-t border-gray-100">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">Status:</span>
+              <span className="text-xs md:text-sm text-gray-600">Status:</span>
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
                   occupancyRate >= 90
@@ -152,8 +160,8 @@ const DormOccupancy = () => {
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={domOccupancy}
-          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-          barCategoryGap="20%"
+          margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
+          barCategoryGap="15%"
         >
           <defs>
             {/* Gradient definitions for modern look */}
@@ -181,17 +189,19 @@ const DormOccupancy = () => {
             dataKey="name"
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 13, fill: "#6b7280", fontWeight: 500 }}
+            tick={{ fontSize: 11, fill: "#6b7280", fontWeight: 500 }}
+            interval={0}
           />
           <YAxis
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 12, fill: "#6b7280" }}
+            tick={{ fontSize: 11, fill: "#6b7280" }}
             domain={[0, 100]}
             tickFormatter={(value) => `${value}%`}
+            width={35}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="occupancy" radius={[8, 8, 0, 0]} maxBarSize={60}>
+          <Bar dataKey="occupancy" radius={[6, 6, 0, 0]} maxBarSize={40}>
             {domOccupancy.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}

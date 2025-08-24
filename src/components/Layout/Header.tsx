@@ -48,6 +48,7 @@ export default function Header({
     <header
       className={`bg-white border-b border-gray-200 px-6 py-4 transition-all duration-300 `}
     >
+      {/* First row for menu button and user controls */}
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <button
@@ -56,23 +57,9 @@ export default function Header({
           >
             <Menu className="h-6 w-6" />
           </button>
-          <div className="ml-2 lg:ml-0 text-2xl font-bold text-gray-900">
-            <h1>{title}</h1>
-            {description && (
-              <p className="text-gray-600 text-sm font-normal">{description}</p>
-            )}
-          </div>
         </div>
 
         <div className="flex items-center space-x-4">
-          {/* <div className="hidden sm:block relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-            />
-          </div> */}
           <ServerStatusIndicator
             variant="standard"
             key={`ServerStatusIndicator`}
@@ -112,6 +99,22 @@ export default function Header({
             )}
           </div>
         </div>
+      </div>
+
+      {/* Second row for title and description (visible on mobile) */}
+      <div className="mt-2 block md:hidden">
+        <h1 className="text-xl font-bold text-gray-900">{title}</h1>
+        {description && (
+          <p className="text-gray-600 text-sm font-normal">{description}</p>
+        )}
+      </div>
+
+      {/* Title and description for desktop (hidden on mobile) */}
+      <div className="ml-2 lg:ml-0 text-2xl font-bold text-gray-900 hidden md:block">
+        <h1>{title}</h1>
+        {description && (
+          <p className="text-gray-600 text-sm font-normal">{description}</p>
+        )}
       </div>
 
       {/* Click outside to close user menu */}
