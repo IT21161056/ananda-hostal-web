@@ -75,7 +75,7 @@ export default function Header({
           </div> */}
           <ServerStatusIndicator
             variant="standard"
-            key={`ServerStatusIndicator-${new Date()}`}
+            key={`ServerStatusIndicator`}
           />
           <NotificationBell />
 
