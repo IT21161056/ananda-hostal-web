@@ -75,9 +75,10 @@ export default function AttendanceChart() {
   };
 
   return (
-    <div className={`bg-white rounded-2xl shadow-sm border-0 p-8 `}>
-      <div className="flex items-center justify-between mb-6">
-        <div>
+    <div className={`bg-white rounded-2xl shadow-sm border-0 p-6 md:p-8`}>
+      {/* Header section - stacked on mobile */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <div className="mb-4 md:mb-0">
           <h3 className="text-lg font-semibold text-gray-900">
             Morning & Evening Attendance
           </h3>
@@ -85,7 +86,7 @@ export default function AttendanceChart() {
             Daily attendance comparison across sessions
           </p>
         </div>
-        <div className="flex items-center space-x-4 text-sm">
+        <div className="flex items-center justify-start md:justify-center space-x-4 text-sm">
           <div className="flex items-center">
             <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
             <span className="text-gray-600">Morning</span>
@@ -97,55 +98,58 @@ export default function AttendanceChart() {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={320}>
-        <LineChart
-          data={data}
-          margin={{ top: 10, right: 30, left: 20, bottom: 10 }}
-        >
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="#f1f5f9"
-            horizontal={true}
-            vertical={false}
-          />
-          <XAxis
-            dataKey="day"
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 12, fill: "#64748b" }}
-          />
-          <YAxis
-            axisLine={false}
-            tickLine={false}
-            tick={{ fontSize: 12, fill: "#64748b" }}
-            domain={["dataMin - 10", "dataMax + 10"]}
-          />
-          <Tooltip content={<CustomTooltip />} />
+      {/* Chart container */}
+      <div className="h-64 sm:h-80 md:h-96">
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart
+            data={data}
+            margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="#f1f5f9"
+              horizontal={true}
+              vertical={false}
+            />
+            <XAxis
+              dataKey="day"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: "#64748b" }}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: "#64748b" }}
+              domain={["dataMin - 10", "dataMax + 10"]}
+            />
+            <Tooltip content={<CustomTooltip />} />
 
-          <Line
-            type="monotone"
-            dataKey="morning"
-            stroke="#3b82f6"
-            strokeWidth={3}
-            dot={{ fill: "#3b82f6", strokeWidth: 2, r: 6 }}
-            activeDot={{ r: 8, fill: "#3b82f6", strokeWidth: 2 }}
-            name="Morning Attendance"
-          />
-          <Line
-            type="monotone"
-            dataKey="evening"
-            stroke="#8b5cf6"
-            strokeWidth={3}
-            dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 6 }}
-            activeDot={{ r: 8, fill: "#8b5cf6", strokeWidth: 2 }}
-            name="Evening Attendance"
-            strokeDasharray="5 5"
-          />
-        </LineChart>
-      </ResponsiveContainer>
+            <Line
+              type="monotone"
+              dataKey="morning"
+              stroke="#3b82f6"
+              strokeWidth={3}
+              dot={{ fill: "#3b82f6", strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6, fill: "#3b82f6", strokeWidth: 2 }}
+              name="Morning Attendance"
+            />
+            <Line
+              type="monotone"
+              dataKey="evening"
+              stroke="#8b5cf6"
+              strokeWidth={3}
+              dot={{ fill: "#8b5cf6", strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6, fill: "#8b5cf6", strokeWidth: 2 }}
+              name="Evening Attendance"
+              strokeDasharray="5 5"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-4 border-t border-gray-100">
+      {/* Quick Stats - stacked on mobile */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-4 border-t border-gray-100">
         <div className="text-center">
           <p className="text-sm text-gray-600">Avg Morning</p>
           <p className="text-lg font-semibold text-blue-600">327</p>
@@ -156,7 +160,7 @@ export default function AttendanceChart() {
         </div>
         <div className="text-center">
           <p className="text-sm text-gray-600">Best Day</p>
-          <p className="text-lg font-semibold text-green-600">Wednesday</p>
+          <p className="text-lg font-semibold text-green-600">Wed</p>
         </div>
         <div className="text-center">
           <p className="text-sm text-gray-600">Attendance Rate</p>
