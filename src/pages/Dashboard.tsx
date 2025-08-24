@@ -1,9 +1,8 @@
 import React from "react";
 import { Users, UserCheck, AlertTriangle, DollarSign } from "lucide-react";
 import StatsCard from "../components/Dashboard/StatsCard";
+import DormOccupancy from "../components/Dashboard/DormOccupancy";
 import AttendanceChart from "../components/Dashboard/AttendanceChart";
-import HostelOccupancy from "../components/Dashboard/HostelOccupancy";
-import TestNotification from "../components/Layout/TestNotification";
 import { mockDashboardStats } from "../data/mockData";
 
 export default function Dashboard() {
@@ -11,12 +10,6 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Test Notification Component - Remove after testing */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">Test Notifications</h3>
-        <TestNotification />
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
           title="Total Students"
@@ -56,7 +49,7 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <AttendanceChart />
-        <HostelOccupancy />
+        <DormOccupancy />
       </div>
     </div>
   );
