@@ -73,7 +73,10 @@ export default function Header({
               className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
             />
           </div> */}
-          <ServerStatusIndicator variant="standard" />
+          <ServerStatusIndicator
+            variant="standard"
+            key={`ServerStatusIndicator-${new Date()}`}
+          />
           <NotificationBell />
 
           {/* User Menu */}
