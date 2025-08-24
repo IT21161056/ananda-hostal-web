@@ -137,6 +137,7 @@ export interface User {
   role: "admin" | "warden" | "accountant" | "kitchen";
   createdAt: string;
   updatedAt: string;
+  // accessToken: string;
 }
 
 export interface LoginCredentials {

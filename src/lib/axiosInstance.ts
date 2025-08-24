@@ -1,4 +1,5 @@
 import axios from "axios";
+import { API_URL, API_URL_LOCAL } from "../utils/constants";
 
 // const API_URL = import.meta.env.VITE_API_URL;
 
@@ -6,12 +7,8 @@ import axios from "axios";
 //   throw new Error("VITE_API_URL is not defined in environment variables");
 // }
 
-const API_URL = "https://ananda-hostal-api-4bd6e03768d8.herokuapp.com/api/v1";
-
-// const API_URL = "http://localhost:5001/api/v1";
-
 const axiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL_LOCAL,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
@@ -53,7 +50,7 @@ axiosInstance.interceptors.response.use(
 
       try {
         // Try to refresh the token
-        const response = await axios.get(`${API_URL}/auth/refresh`, {
+        const response = await axios.get(`${API_URL_LOCAL}/auth/refresh`, {
           withCredentials: true,
         });
 

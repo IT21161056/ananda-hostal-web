@@ -10,6 +10,7 @@ import { login as loginApi, logout as logoutApi } from "../api/auth";
 
 interface AuthContextType {
   user: User | null;
+  // token: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
@@ -60,6 +61,7 @@ const rolePermissions = {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  // const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Check for existing user session on mount
@@ -67,17 +69,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initializeAuth = () => {
       try {
         const storedUser = localStorage.getItem("user");
-        const token = localStorage.getItem("accessToken");
+        const storedToken = localStorage.getItem("accessToken");
 
-        if (storedUser && token) {
+        if (storedUser && storedToken) {
           const userData = JSON.parse(storedUser);
           setUser(userData);
+          // setToken(storedToken);
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
         // Clear invalid data
         localStorage.removeItem("user");
         localStorage.removeItem("accessToken");
+        // setToken(null);
       } finally {
         setLoading(false);
       }
@@ -86,6 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for logout events from axios interceptor
     const handleLogout = () => {
       setUser(null);
+      // setToken(null);
     };
 
     window.addEventListener("auth:logout", handleLogout);
@@ -97,11 +102,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Monitor authentication state changes
-  useEffect(() => {
-    // Authentication state monitoring removed for production
-  }, [user, loading]);
-
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const response = await loginApi({ email, password });
@@ -109,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Ensure the role is one of the expected values
       const userData: User = {
         ...response.user,
+        // accessToken: response.accessToken,
         role: response.user.role as
           | "admin"
           | "warden"
@@ -121,6 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("accessToken", response.accessToken);
 
       setUser(userData);
+      // setToken(response.accessToken);
       return true;
     } catch (error: any) {
       console.error("Login error:", error);
@@ -148,6 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("user");
       localStorage.removeItem("accessToken");
       setUser(null);
+      // setToken(null);
     }
   };
 
@@ -165,6 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        // token,
         login,
         logout,
         isAuthenticated: !!user,

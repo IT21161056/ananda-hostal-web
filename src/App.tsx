@@ -87,13 +87,13 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <SocketProvider>
-        <AuthProvider>
+      <AuthProvider>
+        <SocketProvider>
           <Router>
             <AppContent />
           </Router>
-        </AuthProvider>
-      </SocketProvider>
+        </SocketProvider>
+      </AuthProvider>
       <ToastContainer />
     </QueryClientProvider>
   );

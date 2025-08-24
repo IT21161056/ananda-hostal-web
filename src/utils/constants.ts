@@ -25,3 +25,12 @@ export const dorms = [
   { value: "gamunu", label: "10-Gamunu" },
   { value: "wijaya", label: "11-Wijaya" },
 ];
+
+export const API_URL =
+  "https://ananda-hostal-api-4bd6e03768d8.herokuapp.com/api/v1";
+
+export const SOCKET_URL =
+  "https://ananda-hostal-api-4bd6e03768d8.herokuapp.com";
+
+export const SOCKET_URL_LOCAL = "http://localhost:5001";
+export const API_URL_LOCAL = "http://localhost:5001/api/v1";

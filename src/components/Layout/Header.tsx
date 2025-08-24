@@ -1,20 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { Bell, Search, Menu, User, LogOut, ChevronDown } from "lucide-react";
+import { Search, Menu, User, LogOut, ChevronDown } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useSocket } from "../../context/socket";
+import NotificationBell from "./NotificationBell";
 
 interface HeaderProps {
   title: string;
+  description?: string;
   onMenuClick?: () => void;
   sidebarCollapsed?: boolean;
 }
 
 export default function Header({
   title,
+  description,
   onMenuClick,
   sidebarCollapsed,
 }: HeaderProps) {
-  const socket = useSocket();
+  const { socket } = useSocket();
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -52,9 +55,12 @@ export default function Header({
           >
             <Menu className="h-6 w-6" />
           </button>
-          <h1 className="ml-2 lg:ml-0 text-2xl font-bold text-gray-900">
-            {title}
-          </h1>
+          <div className="ml-2 lg:ml-0 text-2xl font-bold text-gray-900">
+            <h1>{title}</h1>
+            {description && (
+            <p className="text-gray-600 text-sm font-normal">{description}</p>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center space-x-4">
@@ -67,10 +73,7 @@ export default function Header({
             />
           </div> */}
 
-          <button className="relative p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors duration-200">
-            <Bell className="h-6 w-6" />
-            <span className="absolute top-1 right-1 h-2 w-2 bg-rose-800 rounded-full"></span>
-          </button>
+          <NotificationBell />
 
           {/* User Menu */}
           <div className="relative">

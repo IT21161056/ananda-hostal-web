@@ -37,6 +37,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           <ProtectedRoute permission="view_dashboard">
             <Header
               title="Dashboard"
+              description="Your personalized overview of system data."
               onMenuClick={toggleMobileSidebar}
               sidebarCollapsed={sidebarCollapsed}
             />
@@ -52,6 +53,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           <ProtectedRoute permission="view_students">
             <Header
               title="Students"
+              description="Manage student records, enrollments, and details."
               onMenuClick={toggleMobileSidebar}
               sidebarCollapsed={sidebarCollapsed}
             />
@@ -67,6 +69,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           <ProtectedRoute permission="view_attendance">
             <Header
               title="Attendance"
+              description="Mark and manage daily attendance."
               onMenuClick={toggleMobileSidebar}
               sidebarCollapsed={sidebarCollapsed}
             />
@@ -82,6 +85,7 @@ const AppRoutes: React.FC<AppRoutesProps> = ({
           <ProtectedRoute permission="view_meals">
             <Header
               title="Meal Planning"
+              description="Manage weekly meal plans and kitchen inventory"
               onMenuClick={toggleMobileSidebar}
               sidebarCollapsed={sidebarCollapsed}
             />
