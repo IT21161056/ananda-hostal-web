@@ -57,6 +57,13 @@ export default function Header({
           >
             <Menu className="h-6 w-6" />
           </button>
+          {/* Title and description for desktop (hidden on mobile) */}
+          <div className="ml-2 lg:ml-0 text-2xl font-bold text-gray-900 hidden md:block">
+            <h1>{title}</h1>
+            {description && (
+              <p className="text-gray-600 text-sm font-normal">{description}</p>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center space-x-4">
@@ -104,14 +111,6 @@ export default function Header({
       {/* Second row for title and description (visible on mobile) */}
       <div className="mt-2 block md:hidden">
         <h1 className="text-xl font-bold text-gray-900">{title}</h1>
-        {description && (
-          <p className="text-gray-600 text-sm font-normal">{description}</p>
-        )}
-      </div>
-
-      {/* Title and description for desktop (hidden on mobile) */}
-      <div className="ml-2 lg:ml-0 text-2xl font-bold text-gray-900 hidden md:block">
-        <h1>{title}</h1>
         {description && (
           <p className="text-gray-600 text-sm font-normal">{description}</p>
         )}
