@@ -9,7 +9,7 @@ interface ServerStatusIndicatorProps {
 }
 
 const ServerStatusIndicator: React.FC<ServerStatusIndicatorProps> = ({
-  checkInterval = 30000,
+  checkInterval = 60000,
   showDetailedStatus = false,
   className = "",
   variant = "standard",

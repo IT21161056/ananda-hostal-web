@@ -26,7 +26,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
           <textarea
             ref={ref}
             {...props}
-            rows={1}
+            rows={2}
             className={`w-full px-4 py-2 transition-colors duration-200 rounded-lg shadow-sm outline-none
                 ${
                   error

@@ -1,9 +1,8 @@
 import { AxiosError } from "axios";
 
 type ApiErrorResponse = {
-  Title: string;
-  Status: number;
-  Detail: string;
+  success: boolean;
+  message: string;
 };
 
 export type ApiError = AxiosError<ApiErrorResponse>;
