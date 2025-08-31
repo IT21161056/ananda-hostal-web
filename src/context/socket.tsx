@@ -1,4 +1,3 @@
-// SocketContext.tsx
 import {
   createContext,
   useContext,
@@ -7,7 +6,7 @@ import {
   ReactNode,
 } from "react";
 import { io, Socket } from "socket.io-client";
-import { SOCKET_URL, SOCKET_URL_LOCAL } from "../utils/constants";
+import { SOCKET_URL_LOCAL } from "../utils/constants";
 import { useAuth } from "./AuthContext";
 
 export interface Notification {
@@ -48,8 +47,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  const { user, isAuthenticated } = useAuth();
-  const accessToken = localStorage.getItem("accessToken");
+
+  const { user, token, isAuthenticated } = useAuth();
 
   const addNotification = (notification: Notification) => {
     setNotifications((prev) => [notification, ...prev]);
@@ -66,31 +65,26 @@ export function SocketProvider({ children }: SocketProviderProps) {
   };
 
   useEffect(() => {
-    // Only create socket connection if user is authenticated and has a valid token
-    if (!isAuthenticated || !accessToken) {
+    if (!isAuthenticated || !token) {
       if (socket) {
         socket.disconnect();
         setSocket(undefined);
-        setIsConnected(false);
-        setConnectionError(null);
       }
+      setIsConnected(false);
+      setConnectionError(null);
       return;
     }
 
     console.log(
-      "Attempting socket connection with token:",
-      accessToken.substring(0, 20) + "..."
+      "Connecting socket with token:",
+      token.substring(0, 20) + "..."
     );
 
-    const newSocket = io(SOCKET_URL, {
+    const newSocket = io(SOCKET_URL_LOCAL, {
       transports: ["websocket", "polling"],
       withCredentials: true,
-      auth: {
-        token: accessToken,
-      },
-      query: {
-        token: accessToken, // Also send as query parameter for backup
-      },
+      auth: { token },
+      query: { token },
     });
 
     newSocket.on("connect", () => {
@@ -98,12 +92,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
       setIsConnected(true);
       setConnectionError(null);
 
-      // Send authentication with user ID after connection is established
       if (user?.id) {
-        setTimeout(() => {
-          newSocket.emit("authenticate", { userId: user.id });
-          console.log("Sent authentication for user ID:", user.id);
-        }, 100);
+        newSocket.emit("authenticate", { userId: user.id });
       }
     });
 
@@ -125,17 +115,16 @@ export function SocketProvider({ children }: SocketProviderProps) {
       setConnectionError(null);
     });
 
+    // Handle backend-side token expiration
     newSocket.on("authentication_failure", (error) => {
-      console.error("Authentication failed:", error);
+      console.error("Socket authentication failed:", error);
       setConnectionError(error.message || "Authentication failed");
     });
 
-    // Listen for notifications
     newSocket.on("notification", (notification: Notification) => {
       console.log("Received notification:", notification);
       addNotification(notification);
 
-      // Show browser notification
       if (Notification.permission === "granted") {
         new Notification(notification.title, {
           body: notification.message,
@@ -151,9 +140,10 @@ export function SocketProvider({ children }: SocketProviderProps) {
       setIsConnected(false);
       setConnectionError(null);
     };
-  }, [isAuthenticated, accessToken, user?.id]);
+    // 🔹 Whenever token changes, re-init the socket automatically
+  }, [isAuthenticated, token, user?.id]);
 
-  // Request notification permission
+  // Request browser notification permission
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().then((permission) => {

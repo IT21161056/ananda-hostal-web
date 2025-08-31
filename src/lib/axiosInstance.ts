@@ -8,7 +8,7 @@ import { API_URL, API_URL_LOCAL } from "../utils/constants";
 // }
 
 const axiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL_LOCAL,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
