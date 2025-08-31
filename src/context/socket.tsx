@@ -6,7 +6,7 @@ import {
   ReactNode,
 } from "react";
 import { io, Socket } from "socket.io-client";
-import { SOCKET_URL_LOCAL } from "../utils/constants";
+import { SOCKET_URL, SOCKET_URL_LOCAL } from "../utils/constants";
 import { useAuth } from "./AuthContext";
 
 export interface Notification {
@@ -80,7 +80,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
       token.substring(0, 20) + "..."
     );
 
-    const newSocket = io(SOCKET_URL_LOCAL, {
+    const newSocket = io(SOCKET_URL, {
       transports: ["websocket", "polling"],
       withCredentials: true,
       auth: { token },
