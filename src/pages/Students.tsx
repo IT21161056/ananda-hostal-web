@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import StudentTable from "../components/Students/StudentTable";
 import AddStudentModal from "../components/Students/AddStudentModal";
@@ -54,6 +54,10 @@ export default function Students() {
     pageSize: pageSize,
   });
 
+  useEffect(() => {
+    setPage(1); // Reset to first page on filter/search change
+  }, [searchTerm, filterHostel, filterStatus]);
+
   const handleModalClose = () => {
     setIsAddModalOpen(false);
     setSelectedStudent(undefined);
@@ -95,6 +99,7 @@ export default function Students() {
 
         <div className="flex gap-3">
           <Select
+            className="w-[140px]"
             options={dorms}
             value={filterHostel}
             onChange={(e) => setFilterHostel(e.target.value)}

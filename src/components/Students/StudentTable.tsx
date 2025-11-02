@@ -244,7 +244,7 @@ const StudentTable: FC<Props> = ({
                 </th>
                 <th className="px-6 py-3 text-left">
                   <button className="group inline-flex items-center text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700">
-                    Created At
+                    Addmission Date
                     <svg
                       className="ml-2 h-4 w-4 text-gray-400 group-hover:text-gray-500"
                       fill="none"
@@ -360,17 +360,7 @@ const StudentTable: FC<Props> = ({
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
-                      {new Date(student.admissionDate).toLocaleDateString(
-                        "en-US",
-                        {
-                          month: "numeric",
-                          day: "numeric",
-                          year: "numeric",
-                          hour: "numeric",
-                          minute: "2-digit",
-                          hour12: true,
-                        }
-                      )}
+                      {student.admissionDate}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end relative actions-dropdown">

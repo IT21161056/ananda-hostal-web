@@ -20,7 +20,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
       options,
       error,
       loading,
-      className = "",
+      className = "w-full",
       required = false,
       ...props
     },
@@ -38,14 +38,13 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
       <div className="relative flex items-center">
         <select
           ref={ref}
-          className={`w-full px-4 py-2 transition-colors duration-200 rounded-lg shadow-sm outline-none
+          className={`${className} px-4 py-2 transition-colors duration-200 rounded-lg shadow-sm outline-none
             ${
               error
                 ? "border border-red-500 focus:border-red-600 focus:ring-2 focus:ring-red-200"
                 : "border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
             }
-            ${loading ? "opacity-60 cursor-not-allowed" : ""}
-            ${className}`}
+            ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
           disabled={loading}
           {...props}
         >

@@ -23,7 +23,7 @@ export const dorms = [
   { value: "parakum", label: "8-Parakum" },
   { value: "gajaba", label: "9-Gajaba" },
   { value: "gamunu", label: "10-Gamunu" },
-  { value: "wijaya", label: "11-Wijaya" },
+  { value: "11-Wijaya", label: "11-Wijaya" },
 ];
 
 export const API_URL =
