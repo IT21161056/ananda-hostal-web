@@ -18,11 +18,11 @@ export enum student_status {
 
 export const dorms = [
   { value: "", label: "all" },
-  { value: "mahasen", label: "6-Mahasen" },
-  { value: "thissa", label: "7-Thissa" },
-  { value: "parakum", label: "8-Parakum" },
-  { value: "gajaba", label: "9-Gajaba" },
-  { value: "gamunu", label: "10-Gamunu" },
+  { value: "6-Mahasen", label: "6-Mahasen" },
+  { value: "7-Thissa", label: "7-Thissa" },
+  { value: "8-Perakum", label: "8-Perakum" },
+  { value: "9-Gajaba", label: "9-Gajaba" },
+  { value: "10-Gemunu", label: "10-Gemunu" },
   { value: "11-Wijaya", label: "11-Wijaya" },
 ];
 
