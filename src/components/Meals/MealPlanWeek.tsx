@@ -1,40 +1,30 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Calendar,
   DollarSign,
   Users,
   Plus,
   Edit3,
-  Trash2,
   Save,
   X,
-  Check,
 } from "lucide-react";
 import { getWeekNumberInMonth } from "../../utils/date";
 import * as yup from "yup";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   useCreateMealPlan,
   useGetAllMealPlans,
   useUpdateMealPlan,
 } from "../../api/mealplan";
+import { useGetAllInventoryItems } from "../../api/inventory";
+import { MealPlanInventoryItem, MealPlan } from "../../api/mealplan/types";
+import { InventoryItem } from "../../api/inventory/types";
 import Select from "../elements/select/Select";
 import Input from "../elements/input/Input";
 import Textarea from "../elements/textarea/Textarea";
 import Button from "../elements/button/Button";
 import { toast } from "react-toastify";
-
-type MealPlan = {
-  _id: string;
-  day: string;
-  breakfast: string[];
-  lunch: string[];
-  dinner: string[];
-  estimatedCost: number;
-  createdAt: string;
-  updatedAt: string;
-};
 
 const mealPlanSchema = yup.object().shape({
   day: yup.string().required("Please select a day"),
@@ -117,8 +107,33 @@ export default function MealPlanWeek() {
     estimatedCost: 0,
   });
   const [currentWeek, setCurrentWeek] = useState<string>("");
-  const [isEditingWeek, setIsEditingWeek] = useState<boolean>(false);
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
+
+  // Inventory state for form
+  const [breakfastInventory, setBreakfastInventory] = useState<
+    MealPlanInventoryItem[]
+  >([]);
+  const [lunchInventory, setLunchInventory] = useState<MealPlanInventoryItem[]>(
+    []
+  );
+  const [dinnerInventory, setDinnerInventory] = useState<
+    MealPlanInventoryItem[]
+  >([]);
+
+  // Inventory state for edit mode
+  const [editBreakfastInventory, setEditBreakfastInventory] = useState<
+    MealPlanInventoryItem[]
+  >([]);
+  const [editLunchInventory, setEditLunchInventory] = useState<
+    MealPlanInventoryItem[]
+  >([]);
+  const [editDinnerInventory, setEditDinnerInventory] = useState<
+    MealPlanInventoryItem[]
+  >([]);
+
+  // Fetch inventory items
+  const { data: inventoryResponse } = useGetAllInventoryItems({ limit: 1000 });
+  const inventoryItems = inventoryResponse?.data || [];
 
   // Api calls
   const {
@@ -214,18 +229,47 @@ export default function MealPlanWeek() {
       lunchStr: foodsToString(plan.lunch),
       dinnerStr: foodsToString(plan.dinner),
     });
+    // Set inventory items for editing
+    setEditBreakfastInventory(
+      plan.breakfastInventory?.map((item: MealPlanInventoryItem) => ({
+        inventoryItemId:
+          typeof item.inventoryItemId === "string"
+            ? item.inventoryItemId
+            : (item.inventoryItemId as InventoryItem)._id,
+        quantity: item.quantity,
+      })) || []
+    );
+    setEditLunchInventory(
+      plan.lunchInventory?.map((item: MealPlanInventoryItem) => ({
+        inventoryItemId:
+          typeof item.inventoryItemId === "string"
+            ? item.inventoryItemId
+            : (item.inventoryItemId as InventoryItem)._id,
+        quantity: item.quantity,
+      })) || []
+    );
+    setEditDinnerInventory(
+      plan.dinnerInventory?.map((item: MealPlanInventoryItem) => ({
+        inventoryItemId:
+          typeof item.inventoryItemId === "string"
+            ? item.inventoryItemId
+            : (item.inventoryItemId as InventoryItem)._id,
+        quantity: item.quantity,
+      })) || []
+    );
   };
 
   // Save edited meal plan
   const saveEdit = () => {
-    // This would typically call your API update endpoint
-
     updateMealPlan({
       day: editData.day!,
       estimatedCost: editData.estimatedCost!,
       breakfast: stringToFoods(editData.breakfastStr),
       lunch: stringToFoods(editData.lunchStr),
       dinner: stringToFoods(editData.dinnerStr),
+      breakfastInventory: editBreakfastInventory,
+      lunchInventory: editLunchInventory,
+      dinnerInventory: editDinnerInventory,
     });
   };
 
@@ -240,14 +284,9 @@ export default function MealPlanWeek() {
       dinnerStr: "",
       estimatedCost: 0,
     });
-  };
-
-  // Delete meal plan
-  const deleteMealPlan = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this meal plan?")) {
-      // This would typically call your API delete endpoint
-      console.log("Delete meal plan with id:", id);
-    }
+    setEditBreakfastInventory([]);
+    setEditLunchInventory([]);
+    setEditDinnerInventory([]);
   };
 
   // Set current week on component mount
@@ -273,16 +312,125 @@ export default function MealPlanWeek() {
       formData.day &&
       (formData.breakfast || formData.lunch || formData.dinner)
     ) {
-      // This would typically call your API create endpoint
       const payload = {
         ...formData,
         breakfast: stringToFoods(formData.breakfast),
         lunch: stringToFoods(formData.lunch),
         dinner: stringToFoods(formData.dinner),
+        breakfastInventory: breakfastInventory,
+        lunchInventory: lunchInventory,
+        dinnerInventory: dinnerInventory,
       };
 
       createMealPlan(payload);
+      // Reset inventory state
+      setBreakfastInventory([]);
+      setLunchInventory([]);
+      setDinnerInventory([]);
     }
+  };
+
+  // Helper functions to manage inventory items
+  const addInventoryItem = (
+    mealType: "breakfast" | "lunch" | "dinner",
+    isEdit: boolean = false
+  ) => {
+    const itemId = "";
+    const quantity = 0;
+    const newItem: MealPlanInventoryItem = {
+      inventoryItemId: itemId,
+      quantity,
+    };
+
+    if (isEdit) {
+      if (mealType === "breakfast") {
+        setEditBreakfastInventory([...editBreakfastInventory, newItem]);
+      } else if (mealType === "lunch") {
+        setEditLunchInventory([...editLunchInventory, newItem]);
+      } else {
+        setEditDinnerInventory([...editDinnerInventory, newItem]);
+      }
+    } else {
+      if (mealType === "breakfast") {
+        setBreakfastInventory([...breakfastInventory, newItem]);
+      } else if (mealType === "lunch") {
+        setLunchInventory([...lunchInventory, newItem]);
+      } else {
+        setDinnerInventory([...dinnerInventory, newItem]);
+      }
+    }
+  };
+
+  const removeInventoryItem = (
+    mealType: "breakfast" | "lunch" | "dinner",
+    index: number,
+    isEdit: boolean = false
+  ) => {
+    if (isEdit) {
+      if (mealType === "breakfast") {
+        setEditBreakfastInventory(
+          editBreakfastInventory.filter((_, i) => i !== index)
+        );
+      } else if (mealType === "lunch") {
+        setEditLunchInventory(editLunchInventory.filter((_, i) => i !== index));
+      } else {
+        setEditDinnerInventory(
+          editDinnerInventory.filter((_, i) => i !== index)
+        );
+      }
+    } else {
+      if (mealType === "breakfast") {
+        setBreakfastInventory(breakfastInventory.filter((_, i) => i !== index));
+      } else if (mealType === "lunch") {
+        setLunchInventory(lunchInventory.filter((_, i) => i !== index));
+      } else {
+        setDinnerInventory(dinnerInventory.filter((_, i) => i !== index));
+      }
+    }
+  };
+
+  const updateInventoryItem = (
+    mealType: "breakfast" | "lunch" | "dinner",
+    index: number,
+    field: "inventoryItemId" | "quantity",
+    value: string | number,
+    isEdit: boolean = false
+  ) => {
+    if (isEdit) {
+      if (mealType === "breakfast") {
+        const updated = [...editBreakfastInventory];
+        updated[index] = { ...updated[index], [field]: value };
+        setEditBreakfastInventory(updated);
+      } else if (mealType === "lunch") {
+        const updated = [...editLunchInventory];
+        updated[index] = { ...updated[index], [field]: value };
+        setEditLunchInventory(updated);
+      } else {
+        const updated = [...editDinnerInventory];
+        updated[index] = { ...updated[index], [field]: value };
+        setEditDinnerInventory(updated);
+      }
+    } else {
+      if (mealType === "breakfast") {
+        const updated = [...breakfastInventory];
+        updated[index] = { ...updated[index], [field]: value };
+        setBreakfastInventory(updated);
+      } else if (mealType === "lunch") {
+        const updated = [...lunchInventory];
+        updated[index] = { ...updated[index], [field]: value };
+        setLunchInventory(updated);
+      } else {
+        const updated = [...dinnerInventory];
+        updated[index] = { ...updated[index], [field]: value };
+        setDinnerInventory(updated);
+      }
+    }
+  };
+
+  // Helper to get inventory item name
+  const getInventoryItemName = (itemId: string): string => {
+    const item = inventoryItems.find((i: InventoryItem) => i._id === itemId);
+    return item ? item.name : "Unknown";
   };
 
   return (
@@ -460,6 +608,41 @@ export default function MealPlanWeek() {
                 )}
               />
             </div>
+
+            {/* Inventory Selection for Add Form */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <InventorySelection
+                label="Breakfast Inventory"
+                items={breakfastInventory}
+                inventoryItems={inventoryItems}
+                onAdd={() => addInventoryItem("breakfast")}
+                onRemove={(index) => removeInventoryItem("breakfast", index)}
+                onUpdate={(index, field, value) =>
+                  updateInventoryItem("breakfast", index, field, value)
+                }
+              />
+              <InventorySelection
+                label="Lunch Inventory"
+                items={lunchInventory}
+                inventoryItems={inventoryItems}
+                onAdd={() => addInventoryItem("lunch")}
+                onRemove={(index) => removeInventoryItem("lunch", index)}
+                onUpdate={(index, field, value) =>
+                  updateInventoryItem("lunch", index, field, value)
+                }
+              />
+              <InventorySelection
+                label="Dinner Inventory"
+                items={dinnerInventory}
+                inventoryItems={inventoryItems}
+                onAdd={() => addInventoryItem("dinner")}
+                onRemove={(index) => removeInventoryItem("dinner", index)}
+                onUpdate={(index, field, value) =>
+                  updateInventoryItem("dinner", index, field, value)
+                }
+              />
+            </div>
+
             <div className="flex space-x-3">
               <Button
                 disabled={creatingMealPlan}
@@ -473,6 +656,9 @@ export default function MealPlanWeek() {
                 onClick={() => {
                   setShowAddForm(false);
                   reset();
+                  setBreakfastInventory([]);
+                  setLunchInventory([]);
+                  setDinnerInventory([]);
                 }}
                 className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
               >
@@ -544,6 +730,24 @@ export default function MealPlanWeek() {
                         }
                         placeholder="Enter breakfast items (comma separated)..."
                       />
+                      <InventorySelection
+                        label="Inventory"
+                        items={editBreakfastInventory}
+                        inventoryItems={inventoryItems}
+                        onAdd={() => addInventoryItem("breakfast", true)}
+                        onRemove={(index) =>
+                          removeInventoryItem("breakfast", index, true)
+                        }
+                        onUpdate={(index, field, value) =>
+                          updateInventoryItem(
+                            "breakfast",
+                            index,
+                            field,
+                            value,
+                            true
+                          )
+                        }
+                      />
                     </div>
 
                     <div className="space-y-2">
@@ -556,6 +760,24 @@ export default function MealPlanWeek() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                         placeholder="Enter lunch items (comma separated)..."
                       />
+                      <InventorySelection
+                        label="Inventory"
+                        items={editLunchInventory}
+                        inventoryItems={inventoryItems}
+                        onAdd={() => addInventoryItem("lunch", true)}
+                        onRemove={(index) =>
+                          removeInventoryItem("lunch", index, true)
+                        }
+                        onUpdate={(index, field, value) =>
+                          updateInventoryItem(
+                            "lunch",
+                            index,
+                            field,
+                            value,
+                            true
+                          )
+                        }
+                      />
                     </div>
 
                     <div className="space-y-2">
@@ -567,6 +789,24 @@ export default function MealPlanWeek() {
                         }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                         placeholder="Enter dinner items (comma separated)..."
+                      />
+                      <InventorySelection
+                        label="Inventory"
+                        items={editDinnerInventory}
+                        inventoryItems={inventoryItems}
+                        onAdd={() => addInventoryItem("dinner", true)}
+                        onRemove={(index) =>
+                          removeInventoryItem("dinner", index, true)
+                        }
+                        onUpdate={(index, field, value) =>
+                          updateInventoryItem(
+                            "dinner",
+                            index,
+                            field,
+                            value,
+                            true
+                          )
+                        }
                       />
                     </div>
                   </div>
@@ -605,6 +845,33 @@ export default function MealPlanWeek() {
                           ? plan.breakfast.join(", ")
                           : "No breakfast planned"}
                       </p>
+                      {plan.breakfastInventory &&
+                        plan.breakfastInventory.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            <p className="text-xs font-medium text-gray-600">
+                              Inventory Items:
+                            </p>
+                            {plan.breakfastInventory.map((item, idx) => {
+                              const itemId =
+                                typeof item.inventoryItemId === "string"
+                                  ? item.inventoryItemId
+                                  : item.inventoryItemId._id;
+                              const itemName =
+                                typeof item.inventoryItemId === "string"
+                                  ? getInventoryItemName(itemId)
+                                  : item.inventoryItemId.name;
+                              const inventoryItem = inventoryItems.find(
+                                (i: InventoryItem) => i._id === itemId
+                              );
+                              return (
+                                <p key={idx} className="text-xs text-gray-600">
+                                  • {itemName}: {item.quantity}{" "}
+                                  {inventoryItem?.unit || ""}
+                                </p>
+                              );
+                            })}
+                          </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -614,6 +881,33 @@ export default function MealPlanWeek() {
                           ? plan.lunch.join(", ")
                           : "No lunch planned"}
                       </p>
+                      {plan.lunchInventory &&
+                        plan.lunchInventory.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            <p className="text-xs font-medium text-gray-600">
+                              Inventory Items:
+                            </p>
+                            {plan.lunchInventory.map((item, idx) => {
+                              const itemId =
+                                typeof item.inventoryItemId === "string"
+                                  ? item.inventoryItemId
+                                  : item.inventoryItemId._id;
+                              const itemName =
+                                typeof item.inventoryItemId === "string"
+                                  ? getInventoryItemName(itemId)
+                                  : item.inventoryItemId.name;
+                              const inventoryItem = inventoryItems.find(
+                                (i: InventoryItem) => i._id === itemId
+                              );
+                              return (
+                                <p key={idx} className="text-xs text-gray-600">
+                                  • {itemName}: {item.quantity}{" "}
+                                  {inventoryItem?.unit || ""}
+                                </p>
+                              );
+                            })}
+                          </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -623,6 +917,33 @@ export default function MealPlanWeek() {
                           ? plan.dinner.join(", ")
                           : "No dinner planned"}
                       </p>
+                      {plan.dinnerInventory &&
+                        plan.dinnerInventory.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            <p className="text-xs font-medium text-gray-600">
+                              Inventory Items:
+                            </p>
+                            {plan.dinnerInventory.map((item, idx) => {
+                              const itemId =
+                                typeof item.inventoryItemId === "string"
+                                  ? item.inventoryItemId
+                                  : item.inventoryItemId._id;
+                              const itemName =
+                                typeof item.inventoryItemId === "string"
+                                  ? getInventoryItemName(itemId)
+                                  : item.inventoryItemId.name;
+                              const inventoryItem = inventoryItems.find(
+                                (i: InventoryItem) => i._id === itemId
+                              );
+                              return (
+                                <p key={idx} className="text-xs text-gray-600">
+                                  • {itemName}: {item.quantity}{" "}
+                                  {inventoryItem?.unit || ""}
+                                </p>
+                              );
+                            })}
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -630,6 +951,106 @@ export default function MealPlanWeek() {
             </div>
           ))}
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Inventory Selection Component
+type InventorySelectionProps = {
+  label: string;
+  items: MealPlanInventoryItem[];
+  inventoryItems: InventoryItem[];
+  onAdd: () => void;
+  onRemove: (index: number) => void;
+  onUpdate: (
+    index: number,
+    field: "inventoryItemId" | "quantity",
+    value: string | number
+  ) => void;
+};
+
+function InventorySelection({
+  label,
+  items,
+  inventoryItems,
+  onAdd,
+  onRemove,
+  onUpdate,
+}: InventorySelectionProps) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <label className="text-sm font-medium text-gray-700">{label}</label>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1"
+        >
+          <Plus className="h-3 w-3" />
+          Add Item
+        </button>
+      </div>
+      <div className="space-y-2">
+        {items.map((item, index) => {
+          const itemId =
+            typeof item.inventoryItemId === "string"
+              ? item.inventoryItemId
+              : item.inventoryItemId._id;
+          const selectedItem = inventoryItems.find(
+            (i: InventoryItem) => i._id === itemId
+          );
+          return (
+            <div key={index} className="flex gap-2 items-center">
+              <select
+                value={
+                  typeof item.inventoryItemId === "string"
+                    ? item.inventoryItemId
+                    : item.inventoryItemId._id
+                }
+                onChange={(e) =>
+                  onUpdate(index, "inventoryItemId", e.target.value)
+                }
+                className="flex-1 text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Select item...</option>
+                {inventoryItems.map((invItem) => (
+                  <option key={invItem._id} value={invItem._id}>
+                    {invItem.name} ({invItem.unit})
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                value={item.quantity}
+                onChange={(e) =>
+                  onUpdate(index, "quantity", Number(e.target.value))
+                }
+                placeholder="Qty"
+                min={0}
+                step="0.01"
+                className="w-20 text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              {selectedItem && (
+                <span className="text-xs text-gray-500">
+                  {selectedItem.unit}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => onRemove(index)}
+                className="text-red-600 hover:text-red-700 p-1"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          );
+        })}
+        {items.length === 0 && (
+          <p className="text-xs text-gray-500 italic">
+            No inventory items selected
+          </p>
+        )}
       </div>
     </div>
   );

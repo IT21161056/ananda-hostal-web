@@ -1,19 +1,28 @@
 import { ApiError } from "../hooks/types";
+import { InventoryItem } from "../inventory/types";
+
+export type MealPlanInventoryItem = {
+  inventoryItemId: string | InventoryItem;
+  quantity: number;
+};
 
 export type MealPlan = {
   _id: string;
-  day: string; // YYYY-MM-DD
+  day: string; // Monday, Tuesday, etc.
   estimatedCost: number;
   breakfast: string[];
   lunch: string[];
   dinner: string[];
+  breakfastInventory?: MealPlanInventoryItem[];
+  lunchInventory?: MealPlanInventoryItem[];
+  dinnerInventory?: MealPlanInventoryItem[];
   createdBy: string;
   createdAt: string;
   updatedAt: string;
 };
 
 export type GetAllMealPlansPaginated = {
-  count: number;
+  total: number;
   data: MealPlan[];
 };
 
@@ -23,6 +32,9 @@ export type CreateMealPlan = {
   breakfast: string[];
   lunch: string[];
   dinner: string[];
+  breakfastInventory?: MealPlanInventoryItem[];
+  lunchInventory?: MealPlanInventoryItem[];
+  dinnerInventory?: MealPlanInventoryItem[];
 };
 
 export type TUseCreateMealPlan = {
