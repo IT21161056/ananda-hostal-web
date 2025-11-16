@@ -15,6 +15,7 @@ export interface CreateAttendanceSessionRequest {
   sessionType: "morning" | "evening";
   notes?: string;
   records: StudentRecord[];
+  date?: string; // Date in YYYY-MM-DD format
 }
 
 export interface AttendanceSession {
