@@ -17,22 +17,12 @@ interface DormData {
   status: "high" | "medium" | "low";
 }
 
-const domOccupancy: DormData[] = [
-  { name: "Dom A", occupancy: 85, capacity: 50, status: "medium" },
-  { name: "Dom B", occupancy: 92, capacity: 50, status: "high" },
-  { name: "Dom C", occupancy: 78, capacity: 50, status: "low" },
-  { name: "Dom D", occupancy: 88, capacity: 50, status: "medium" },
-  { name: "Dom E", occupancy: 95, capacity: 50, status: "high" },
-  { name: "Dom F", occupancy: 82, capacity: 50, status: "low" },
-  { name: "Dom G", occupancy: 90, capacity: 50, status: "high" },
-];
-
-// Modern gradient colors based on occupancy level
-const getBarColor = (occupancy: number): string => {
-  if (occupancy >= 90) return "#ef4444"; // Red for high occupancy
-  if (occupancy >= 85) return "#f59e0b"; // Amber for medium occupancy
-  return "#10b981"; // Green for low occupancy
-};
+interface DormOccupancyProps {
+  dormOccupancy: Record<string, number>;
+  avgOccupancy: number;
+  totalAvailableBeds: number;
+  highOccupancyCount: number;
+}
 
 // Modern gradient definitions
 const getGradientId = (occupancy: number): string => {
@@ -45,9 +35,19 @@ interface ChartCardProps {
   title: string;
   children: React.ReactNode;
   className?: string;
+  avgOccupancy: number;
+  totalAvailableBeds: number;
+  highOccupancyCount: number;
 }
 
-const ChartCard: FC<ChartCardProps> = ({ title, children, className = "" }) => (
+const ChartCard: FC<ChartCardProps> = ({
+  title,
+  children,
+  className = "",
+  avgOccupancy,
+  totalAvailableBeds,
+  highOccupancyCount,
+}) => (
   <div
     className={`bg-white rounded-2xl shadow-sm border-0 p-6 md:p-8 ${className}`}
   >
@@ -81,15 +81,21 @@ const ChartCard: FC<ChartCardProps> = ({ title, children, className = "" }) => (
     {/* Summary stats - stacked on mobile */}
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t border-gray-100">
       <div className="text-center">
-        <p className="text-xl md:text-2xl font-bold text-gray-900">87.1%</p>
+        <p className="text-xl md:text-2xl font-bold text-gray-900">
+          {avgOccupancy.toFixed(1)}%
+        </p>
         <p className="text-sm text-gray-500">Avg Occupancy</p>
       </div>
       <div className="text-center">
-        <p className="text-xl md:text-2xl font-bold text-green-600">68</p>
+        <p className="text-xl md:text-2xl font-bold text-green-600">
+          {totalAvailableBeds}
+        </p>
         <p className="text-sm text-gray-500">Available Beds</p>
       </div>
       <div className="text-center">
-        <p className="text-xl md:text-2xl font-bold text-blue-600">3</p>
+        <p className="text-xl md:text-2xl font-bold text-blue-600">
+          {highOccupancyCount}
+        </p>
         <p className="text-sm text-gray-500">High Occupancy</p>
       </div>
     </div>
@@ -154,9 +160,33 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const DormOccupancy = () => {
+const DormOccupancy = ({
+  dormOccupancy,
+  avgOccupancy,
+  totalAvailableBeds,
+  highOccupancyCount,
+}: DormOccupancyProps) => {
+  // Convert dormOccupancy object to array format
+  const DORM_CAPACITY = 50;
+  const domOccupancy: DormData[] = Object.entries(dormOccupancy).map(
+    ([name, occupancy]) => ({
+      name,
+      occupancy,
+      capacity: DORM_CAPACITY,
+      status: occupancy >= 90 ? "high" : occupancy >= 85 ? "medium" : "low",
+    })
+  );
+
+  // Sort by name for consistent display
+  domOccupancy.sort((a, b) => a.name.localeCompare(b.name));
+
   return (
-    <ChartCard title="Dormitory Occupancy Analytics">
+    <ChartCard
+      title="Dormitory Occupancy Analytics"
+      avgOccupancy={avgOccupancy}
+      totalAvailableBeds={totalAvailableBeds}
+      highOccupancyCount={highOccupancyCount}
+    >
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={domOccupancy}

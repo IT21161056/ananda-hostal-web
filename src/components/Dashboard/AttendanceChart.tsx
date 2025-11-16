@@ -1,7 +1,5 @@
 import React from "react";
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -17,6 +15,14 @@ interface AttendanceData {
   evening: number;
 }
 
+interface AttendanceChartProps {
+  attendanceData: AttendanceData[];
+  avgMorning?: number;
+  avgEvening?: number;
+  bestDay?: string;
+  attendanceRate?: number;
+}
+
 interface TooltipProps {
   active?: boolean;
   payload?: Array<{
@@ -27,17 +33,13 @@ interface TooltipProps {
   label?: string;
 }
 
-const data: AttendanceData[] = [
-  { day: "Mon", morning: 340, evening: 335 },
-  { day: "Tue", morning: 345, evening: 330 },
-  { day: "Wed", morning: 350, evening: 342 },
-  { day: "Thu", morning: 348, evening: 338 },
-  { day: "Fri", morning: 332, evening: 325 },
-  { day: "Sat", morning: 298, evening: 285 },
-  { day: "Sun", morning: 276, evening: 260 },
-];
-
-export default function AttendanceChart() {
+export default function AttendanceChart({
+  attendanceData,
+  avgMorning = 0,
+  avgEvening = 0,
+  bestDay = "N/A",
+  attendanceRate = 0,
+}: AttendanceChartProps) {
   const CustomTooltip: React.FC<TooltipProps> = ({
     active,
     payload,
@@ -102,7 +104,7 @@ export default function AttendanceChart() {
       <div className="h-64 sm:h-80 md:h-96">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
-            data={data}
+            data={attendanceData || []}
             margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
           >
             <CartesianGrid
@@ -152,19 +154,21 @@ export default function AttendanceChart() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-4 border-t border-gray-100">
         <div className="text-center">
           <p className="text-sm text-gray-600">Avg Morning</p>
-          <p className="text-lg font-semibold text-blue-600">327</p>
+          <p className="text-lg font-semibold text-blue-600">{avgMorning}</p>
         </div>
         <div className="text-center">
           <p className="text-sm text-gray-600">Avg Evening</p>
-          <p className="text-lg font-semibold text-purple-600">316</p>
+          <p className="text-lg font-semibold text-purple-600">{avgEvening}</p>
         </div>
         <div className="text-center">
           <p className="text-sm text-gray-600">Best Day</p>
-          <p className="text-lg font-semibold text-green-600">Wed</p>
+          <p className="text-lg font-semibold text-green-600">{bestDay}</p>
         </div>
         <div className="text-center">
           <p className="text-sm text-gray-600">Attendance Rate</p>
-          <p className="text-lg font-semibold text-gray-900">89.5%</p>
+          <p className="text-lg font-semibold text-gray-900">
+            {attendanceRate.toFixed(1)}%
+          </p>
         </div>
       </div>
     </div>

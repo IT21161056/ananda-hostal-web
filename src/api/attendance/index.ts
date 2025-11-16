@@ -19,3 +19,13 @@ export const useGetAttendanceHistory = (params?: Record<string, any>) =>
   useGetRequest<GetAttendanceSessionsPaginated>(`/attendance`, params, {
     refetchOnWindowFocus: true,
   });
+
+export const useCheckAttendanceExists = (
+  params?: Record<string, any>,
+  options?: any
+) =>
+  useGetRequest<{ exists: boolean; session: any | null }>(
+    `/attendance/check`,
+    params,
+    options
+  );
