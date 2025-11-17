@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useContext,
   useState,
@@ -128,13 +128,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Login error:", error);
 
       // Handle specific error messages from backend
+      let errorMessage = "Login failed. Please try again.";
+
       if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
       } else if (error.message) {
-        throw new Error(error.message);
-      } else {
-        throw new Error("Login failed. Please try again.");
+        errorMessage = error.message;
       }
+
+      throw new Error(errorMessage);
     }
   };
 
