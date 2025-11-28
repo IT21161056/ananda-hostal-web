@@ -18,7 +18,7 @@ import {
   useUpdateInventoryItem,
   useDeleteInventoryItem,
 } from "../../api/inventory";
-import { InventoryItem as APIInventoryItem } from "../../api/inventory/types";
+import { InventoryItem as APIInventoryItem, Category } from "../../api/inventory/types";
 import { ApiError } from "../../api/hooks/types";
 import { toast } from "react-toastify";
 import Input from "../elements/input/Input";
@@ -147,20 +147,30 @@ export default function InventoryManagement() {
     // In real app, this would save to backend
   };
 
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "vegetables":
-        return "bg-green-100 text-green-800";
-      case "grains":
-        return "bg-yellow-100 text-yellow-800";
-      case "dairy":
-        return "bg-blue-100 text-blue-800";
-      case "spices":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+const getCategoryColor = (category: string) => {
+  switch (category) {
+    case "vegetables":
+      return "bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm";
+    case "fruits":
+      return "bg-orange-50 text-orange-700 border border-orange-200 shadow-sm";
+    case "grains":
+      return "bg-amber-50 text-amber-700 border border-amber-200 shadow-sm";
+    case "dairy":
+      return "bg-sky-50 text-sky-700 border border-sky-200 shadow-sm";
+    case "meat_fish":
+      return "bg-rose-50 text-rose-700 border border-rose-200 shadow-sm";
+    case "grocery":
+      return "bg-violet-50 text-violet-700 border border-violet-200 shadow-sm";
+    case "oils":
+      return "bg-amber-50 text-amber-700 border border-amber-200 shadow-sm";
+    case "beverages":
+      return "bg-cyan-50 text-cyan-700 border border-cyan-200 shadow-sm";
+    case "spices":
+      return "bg-red-50 text-red-700 border border-red-200 shadow-sm";
+    default:
+      return "bg-slate-50 text-slate-700 border border-slate-200 shadow-sm";
+  }
+};
 
   const getStockStatus = (item: LocalInventoryItem) => {
     if (item.currentStock <= item.minimumStock) return "low";
@@ -515,15 +525,16 @@ export default function InventoryManagement() {
                           {new Date(item.lastUpdated).toLocaleDateString()}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(
-                            item.category
-                          )}`}
-                        >
-                          {item.category}
-                        </span>
-                      </td>
+                     <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-xl text-xs font-medium ${getCategoryColor(
+                          item.category
+                        )}`}
+                      >
+                        <span className="w-2 h-2 rounded-full bg-current opacity-60 mr-2"></span>
+                        {item.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                      </span>
+                    </td>
                       <td className="px-6 py-4">
                         <div className="text-sm font-medium text-gray-900">
                           {item.currentStock} {item.unit}
@@ -536,12 +547,12 @@ export default function InventoryManagement() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm font-medium text-gray-900">
-                          ₹{item.costPerUnit}
+                          Rs {item.costPerUnit}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          className={`inline-flex items-center px-3 py-1 rounded-xl text-xs font-medium ${
                             stockStatus === "low"
                               ? "bg-red-100 text-red-800"
                               : stockStatus === "medium"
@@ -665,13 +676,15 @@ export default function InventoryManagement() {
   );
 }
 
+
+
 // Modal Component for Add/Edit Inventory Item
 type InventoryItemModalProps = {
   item: LocalInventoryItem | null;
   onClose: () => void;
   onSave: (data: {
     name: string;
-    category: "vegetables" | "grains" | "dairy" | "spices" | "other";
+    category: Category;
     currentStock: number;
     unit: string;
     minimumStock: number;
@@ -688,12 +701,7 @@ function InventoryItemModal({
 }: InventoryItemModalProps) {
   const [formData, setFormData] = useState({
     name: item?.name || "",
-    category: (item?.category || "vegetables") as
-      | "vegetables"
-      | "grains"
-      | "dairy"
-      | "spices"
-      | "other",
+    category: (item?.category || "vegetables") as Category,
     currentStock: item?.currentStock || 0,
     unit: item?.unit || "kg",
     minimumStock: item?.minimumStock || 0,
@@ -731,7 +739,7 @@ function InventoryItemModal({
               required
             />
 
-            <Select
+           <Select
               label="Category"
               value={formData.category}
               onChange={(e) =>
@@ -739,8 +747,13 @@ function InventoryItemModal({
               }
               options={[
                 { value: "vegetables", label: "Vegetables" },
+                { value: "fruits", label: "Fruits" },
                 { value: "grains", label: "Grains" },
                 { value: "dairy", label: "Dairy" },
+                { value: "meat_fish", label: "Meat & Fish" },
+                { value: "grocery", label: "Grocery" },
+                { value: "oils", label: "Oils & Fats" },
+                { value: "beverages", label: "Beverages" },
                 { value: "spices", label: "Spices" },
                 { value: "other", label: "Other" },
               ]}

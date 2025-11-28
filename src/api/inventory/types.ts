@@ -19,9 +19,22 @@ export type GetAllInventoryItemsPaginated = {
   data: InventoryItem[];
 };
 
+export type Category =
+  | "vegetables"
+  | "fruits"
+  | "grains"
+  | "dairy"
+  | "meat_fish"
+  | "grocery"
+  | "oils"
+  | "beverages"
+  | "spices"
+  | "other";
+
+
 export type CreateInventoryItem = {
   name: string;
-  category: "vegetables" | "grains" | "dairy" | "spices" | "other";
+  category: Category;
   currentStock: number;
   unit: string;
   minimumStock: number;
