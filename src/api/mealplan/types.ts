@@ -4,6 +4,7 @@ import { InventoryItem } from "../inventory/types";
 export type MealPlanInventoryItem = {
   inventoryItemId: string | InventoryItem;
   quantity: number;
+  forStudents?: number; // Number of students this quantity is for (default: 10)
 };
 
 export type MealPlan = {

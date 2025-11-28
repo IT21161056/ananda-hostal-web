@@ -237,6 +237,7 @@ export default function MealPlanWeek() {
             ? item.inventoryItemId
             : (item.inventoryItemId as InventoryItem)._id,
         quantity: item.quantity,
+        forStudents: item.forStudents || 10,
       })) || []
     );
     setEditLunchInventory(
@@ -246,6 +247,7 @@ export default function MealPlanWeek() {
             ? item.inventoryItemId
             : (item.inventoryItemId as InventoryItem)._id,
         quantity: item.quantity,
+        forStudents: item.forStudents || 10,
       })) || []
     );
     setEditDinnerInventory(
@@ -255,6 +257,7 @@ export default function MealPlanWeek() {
             ? item.inventoryItemId
             : (item.inventoryItemId as InventoryItem)._id,
         quantity: item.quantity,
+        forStudents: item.forStudents || 10,
       })) || []
     );
   };
@@ -340,6 +343,7 @@ export default function MealPlanWeek() {
     const newItem: MealPlanInventoryItem = {
       inventoryItemId: itemId,
       quantity,
+      forStudents: 10, // Default to 10 students
     };
 
     if (isEdit) {
@@ -392,7 +396,7 @@ export default function MealPlanWeek() {
   const updateInventoryItem = (
     mealType: "breakfast" | "lunch" | "dinner",
     index: number,
-    field: "inventoryItemId" | "quantity",
+    field: "inventoryItemId" | "quantity" | "forStudents",
     value: string | number,
     isEdit: boolean = false
   ) => {
@@ -867,6 +871,11 @@ export default function MealPlanWeek() {
                                 <p key={idx} className="text-xs text-gray-600">
                                   • {itemName}: {item.quantity}{" "}
                                   {inventoryItem?.unit || ""}
+                                  {item.forStudents && (
+                                    <span className="text-blue-600 font-medium ml-1">
+                                      (for {item.forStudents} students)
+                                    </span>
+                                  )}
                                 </p>
                               );
                             })}
@@ -903,6 +912,11 @@ export default function MealPlanWeek() {
                                 <p key={idx} className="text-xs text-gray-600">
                                   • {itemName}: {item.quantity}{" "}
                                   {inventoryItem?.unit || ""}
+                                  {item.forStudents && (
+                                    <span className="text-blue-600 font-medium ml-1">
+                                      (for {item.forStudents} students)
+                                    </span>
+                                  )}
                                 </p>
                               );
                             })}
@@ -939,6 +953,11 @@ export default function MealPlanWeek() {
                                 <p key={idx} className="text-xs text-gray-600">
                                   • {itemName}: {item.quantity}{" "}
                                   {inventoryItem?.unit || ""}
+                                  {item.forStudents && (
+                                    <span className="text-blue-600 font-medium ml-1">
+                                      (for {item.forStudents} students)
+                                    </span>
+                                  )}
                                 </p>
                               );
                             })}
@@ -965,7 +984,7 @@ type InventorySelectionProps = {
   onRemove: (index: number) => void;
   onUpdate: (
     index: number,
-    field: "inventoryItemId" | "quantity",
+    field: "inventoryItemId" | "quantity" | "forStudents",
     value: string | number
   ) => void;
 };
@@ -1001,48 +1020,84 @@ function InventorySelection({
             (i: InventoryItem) => i._id === itemId
           );
           return (
-            <div key={index} className="flex gap-2 items-center">
-              <select
-                value={
-                  typeof item.inventoryItemId === "string"
-                    ? item.inventoryItemId
-                    : item.inventoryItemId._id
-                }
-                onChange={(e) =>
-                  onUpdate(index, "inventoryItemId", e.target.value)
-                }
-                className="flex-1 text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Select item...</option>
-                {inventoryItems.map((invItem) => (
-                  <option key={invItem._id} value={invItem._id}>
-                    {invItem.name} ({invItem.unit})
-                  </option>
-                ))}
-              </select>
-              <input
-                type="number"
-                value={item.quantity}
-                onChange={(e) =>
-                  onUpdate(index, "quantity", Number(e.target.value))
-                }
-                placeholder="Qty"
-                min={0}
-                step="0.01"
-                className="w-20 text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              {selectedItem && (
-                <span className="text-xs text-gray-500">
-                  {selectedItem.unit}
-                </span>
+            <div
+              key={index}
+              className="space-y-2 p-2 bg-white border border-gray-200 rounded"
+            >
+              <div className="flex gap-2 items-center">
+                <select
+                  value={
+                    typeof item.inventoryItemId === "string"
+                      ? item.inventoryItemId
+                      : item.inventoryItemId._id
+                  }
+                  onChange={(e) =>
+                    onUpdate(index, "inventoryItemId", e.target.value)
+                  }
+                  className="flex-1 text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select item...</option>
+                  {inventoryItems.map((invItem) => (
+                    <option key={invItem._id} value={invItem._id}>
+                      {invItem.name} ({invItem.unit})
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => onRemove(index)}
+                  className="text-red-600 hover:text-red-700 p-1"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="flex gap-2 items-center">
+                <div className="flex-1">
+                  <label className="text-xs text-gray-600 mb-1 block">
+                    Quantity
+                  </label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) =>
+                        onUpdate(index, "quantity", Number(e.target.value))
+                      }
+                      placeholder="0.00"
+                      min={0}
+                      step="0.01"
+                      className="flex-1 text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    {selectedItem && (
+                      <span className="text-xs text-gray-500 whitespace-nowrap">
+                        {selectedItem.unit}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="w-24">
+                  <label className="text-xs text-gray-600 mb-1 block">
+                    For Students
+                  </label>
+                  <input
+                    type="number"
+                    value={item.forStudents || 10}
+                    onChange={(e) =>
+                      onUpdate(index, "forStudents", Number(e.target.value))
+                    }
+                    placeholder="10"
+                    min={1}
+                    step="1"
+                    className="w-full text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+              {selectedItem && item.quantity > 0 && item.forStudents && (
+                <p className="text-xs text-blue-600 font-medium">
+                  {item.quantity} {selectedItem.unit} for {item.forStudents}{" "}
+                  students
+                </p>
               )}
-              <button
-                type="button"
-                onClick={() => onRemove(index)}
-                className="text-red-600 hover:text-red-700 p-1"
-              >
-                <X className="h-4 w-4" />
-              </button>
             </div>
           );
         })}
